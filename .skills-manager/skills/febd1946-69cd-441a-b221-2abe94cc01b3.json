@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "febd1946-69cd-441a-b221-2abe94cc01b3",
+  "path": "bb-browser",
+  "path_key": "bb-browser",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "skillssh",
+    "ref": "epiral/bb-browser/bb-browser",
+    "subpath": "skills/bb-browser",
+    "branch": null
+  }
+}

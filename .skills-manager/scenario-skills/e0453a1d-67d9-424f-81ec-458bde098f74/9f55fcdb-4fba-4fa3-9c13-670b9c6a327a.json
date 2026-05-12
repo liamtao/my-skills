@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "scenario_id": "e0453a1d-67d9-424f-81ec-458bde098f74",
+  "skill_id": "9f55fcdb-4fba-4fa3-9c13-670b9c6a327a",
+  "sort_order": 0,
+  "tools": {
+    "antigravity": true,
+    "claude_code": true,
+    "cline": true,
+    "codex": true,
+    "continue": true,
+    "gemini_cli": true,
+    "github_copilot": true,
+    "trae": true,
+    "windsurf": true
+  }
+}
