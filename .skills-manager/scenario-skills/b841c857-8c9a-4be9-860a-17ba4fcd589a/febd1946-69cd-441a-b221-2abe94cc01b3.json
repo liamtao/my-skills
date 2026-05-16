@@ -6,6 +6,7 @@
   "tools": {
     "antigravity": false,
     "claude_code": false,
+    "cline": true,
     "codex": false
   }
 }

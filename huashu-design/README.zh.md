@@ -7,7 +7,7 @@
 > *「打字。回车。一份能交付的设计。」*
 > *"Type. Hit enter. A finished design lands in your lap."*
 
-[![License](https://img.shields.io/badge/License-Personal%20Use%20Only-orange.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Agent-Agnostic](https://img.shields.io/badge/Agent-Agnostic-blueviolet)](https://skills.sh)
 [![Skills](https://img.shields.io/badge/skills.sh-Compatible-green)](https://skills.sh)
 
@@ -28,6 +28,8 @@ npx skills add alchaincyf/huashu-design
 ```
 
 跨 agent 通用——Claude Code、Cursor、Codex、OpenClaw、Hermes 都能装。
+
+> 📣 **已改为 MIT 协议。** 自 2026-05-14 起本 skill 完全开源（[MIT License](LICENSE)），个人和**商用都免费**，无需事先授权。原「个人使用免费、企业商用需授权」的条款已作废。([查看变更](#license))
 
 [看效果](#demo-画廊) · [安装](#装上就能用) · [能做什么](#能做什么) · [核心机制](#核心机制) · [和 Claude Design 的关系](#和-claude-design-的关系)
 
@@ -294,19 +296,11 @@ Anthropic 发布 Claude Design 那天我玩到凌晨四点。几天之后发现�
 
 ---
 
-## License · 使用授权
+## License
 
-**个人使用免费、自由**——学习、研究、创作、给自己做东西、写文章、做副业、发微博发公众号，随便用，不用打招呼。
+**2026-05-14 起改为 MIT 协议。** 此前版本采用「个人使用免费、企业商用需授权」的 Personal Use License，对商用做了限制——现在这层限制完全解除。
 
-**企业商用禁止**——任何公司、团队、或以盈利为目的的组织，想把本 skill 集成到产品、对外服务、给客户交付工作中使用，**必须先和花生联系获得授权**。包括但不限于：
-- 把 skill 作为公司内部工具链的一部分
-- 把 skill 产出物作为对外交付物的主要创作手段
-- 基于 skill 二次开发做成商业产品
-- 在客户商单项目中使用
-
-**参考价位**：年度授权 USD 1,800 / 年，永久授权 USD 3,500 一次性。可按公司规模和使用范围定制企业条款。完整条款见 [LICENSE](LICENSE)。
-
-**商用授权联系方式**：邮件 **alchaincyf@gmail.com**（优先），或私信下方任一社交平台。
+按 [MIT License](LICENSE)，你可以**自由使用、修改、分发**本 skill，**包括商业用途**——公司内部用、客户商单交付、做成付费产品对外卖，都没问题。无需事先授权、无需付费、无需打招呼。注明出处不强制，但欢迎。
 
 ---
 
@@ -324,4 +318,4 @@ Anthropic 发布 Claude Design 那天我玩到凌晨四点。几天之后发现�
 | 官网 | huasheng.ai | https://www.huasheng.ai/ |
 | 开发者主页 | bookai.top | https://bookai.top |
 
-商用授权、合作咨询、自媒体约稿 → 以上任一平台私信花生即可。
+合作咨询、自媒体约稿 → 以上任一平台私信花生即可。

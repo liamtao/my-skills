@@ -7,7 +7,7 @@
 > *"Type. Hit enter. A finished design lands in your lap."*
 > *「打字。回车。一份能交付的设计。」*
 
-[![License](https://img.shields.io/badge/License-Personal%20Use%20Only-orange.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Agent-Agnostic](https://img.shields.io/badge/Agent-Agnostic-blueviolet)](https://skills.sh)
 [![Skills](https://img.shields.io/badge/skills.sh-Compatible-green)](https://skills.sh)
 
@@ -26,6 +26,8 @@ Not "decent for AI" quality — it looks like a real design team made it. Give t
 ```
 npx skills add alchaincyf/huashu-design
 ```
+
+> 📣 **Now MIT-licensed.** As of 2026-05-14 this skill is fully open-source under the [MIT License](LICENSE) — free for personal **and** commercial use, no authorization required. ([what changed](#license))
 
 [See it work](#demo-gallery) · [Install](#install) · [What it does](#what-it-does) · [How it works](#core-mechanics) · [vs. Claude Design](#vs-claude-design)
 
@@ -282,19 +284,11 @@ Thanks to Anthropic for writing the Claude Design prompts so clearly. This kind 
 
 ---
 
-## License · Usage Rights
+## License
 
-**Personal use is free and unrestricted** — studying, research, creating things for yourself, writing articles, side projects, personal social media. Use it freely, no need to ask.
+**Relicensed to MIT on 2026-05-14.** This skill was previously released under a Personal Use License that restricted commercial use. That restriction is now removed.
 
-**Enterprise / commercial use is restricted** — any company, team, or for-profit organization integrating this skill into a product, external service, or client deliverable **must obtain authorization from Huasheng first**. Including but not limited to:
-- Using the skill as part of internal company tooling
-- Using skill outputs as the primary creative method for external deliverables
-- Building a commercial product on top of the skill
-- Using it in paid client projects
-
-**Indicative pricing**: USD 1,800 / year (Annual) or USD 3,500 one-time (Perpetual). Custom enterprise terms available. See [LICENSE](LICENSE) for full terms.
-
-**Commercial licensing contact**: email **alchaincyf@gmail.com** (preferred) or DM on any social platform below.
+Under the [MIT License](LICENSE) you are free to **use, modify, and distribute** this skill for any purpose, **including commercial use** — inside companies, in client deliverables, as part of a paid product, anywhere. No prior authorization, no licensing fee, no notification required. Attribution is appreciated but not required.
 
 ---
 
@@ -312,4 +306,4 @@ Huasheng is an AI-native coder, independent developer, and AI content creator. N
 | Official Site | huasheng.ai | https://www.huasheng.ai/ |
 | Developer Hub | bookai.top | https://bookai.top |
 
-For commercial licensing, collaborations, or sponsored content, DM on any of the above.
+For collaborations or sponsored content, DM on any of the above.

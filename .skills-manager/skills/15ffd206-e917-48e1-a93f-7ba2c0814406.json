@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "15ffd206-e917-48e1-a93f-7ba2c0814406",
+  "path": "sigma",
+  "path_key": "sigma",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "skillssh",
+    "ref": "sanyuan0704/sanyuan-skills/sigma",
+    "subpath": "skills/sigma",
+    "branch": null
+  }
+}
