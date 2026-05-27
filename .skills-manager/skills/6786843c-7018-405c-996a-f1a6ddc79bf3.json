@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "6786843c-7018-405c-996a-f1a6ddc79bf3",
+  "path": "openspec",
+  "path_key": "openspec",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "skillssh",
+    "ref": "itechmeat/llm-code/openspec",
+    "subpath": "skills/openspec",
+    "branch": null
+  }
+}

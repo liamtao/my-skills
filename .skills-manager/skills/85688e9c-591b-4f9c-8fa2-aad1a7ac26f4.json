@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "85688e9c-591b-4f9c-8fa2-aad1a7ac26f4",
+  "path": "openspec-context-loading",
+  "path_key": "openspec-context-loading",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "skillssh",
+    "ref": "forztf/open-skilled-sdd/openspec-context-loading",
+    "subpath": "skills/openspec-context-loading",
+    "branch": null
+  }
+}

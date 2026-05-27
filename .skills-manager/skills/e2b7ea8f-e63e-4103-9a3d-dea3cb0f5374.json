@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "e2b7ea8f-e63e-4103-9a3d-dea3cb0f5374",
+  "path": "openspec-archiving-cn",
+  "path_key": "openspec-archiving-cn",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "skillssh",
+    "ref": "forztf/open-skilled-sdd/openspec-archiving-cn",
+    "subpath": "skills/openspec-archiving-cn",
+    "branch": null
+  }
+}
