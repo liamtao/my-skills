@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "9033c000-2e5d-4975-baba-9d5119166117",
+  "path": "karpathy-vibe-to-agentic",
+  "path_key": "karpathy-vibe-to-agentic",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-vibe-to-agentic",
+    "branch": null
+  }
+}

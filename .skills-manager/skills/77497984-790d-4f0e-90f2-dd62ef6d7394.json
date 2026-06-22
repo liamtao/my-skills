@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "77497984-790d-4f0e-90f2-dd62ef6d7394",
+  "path": "karpathy-education-first",
+  "path_key": "karpathy-education-first",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-education-first",
+    "branch": null
+  }
+}

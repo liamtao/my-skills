@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "473bd9fb-7482-4b47-8a38-a9aa491da83a",
+  "path": "karpathy-system-prompt-learning",
+  "path_key": "karpathy-system-prompt-learning",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-system-prompt-learning",
+    "branch": null
+  }
+}

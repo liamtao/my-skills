@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "93012b42-df05-442e-acce-b5a5f8250334",
+  "path": "karpathy-practice-environments",
+  "path_key": "karpathy-practice-environments",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-practice-environments",
+    "branch": null
+  }
+}

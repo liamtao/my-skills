@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "810e3553-3c19-4e86-a749-67993aaa7554",
+  "path": "gsap-timeline",
+  "path_key": "gsap-timeline",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

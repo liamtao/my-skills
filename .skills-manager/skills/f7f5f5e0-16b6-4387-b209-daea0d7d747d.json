@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "f7f5f5e0-16b6-4387-b209-daea0d7d747d",
+  "path": "recording-decisions",
+  "path_key": "recording-decisions",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "83d34846-acd6-48d7-ae1b-1d65d4633f8c",
+  "path": "karpathy-llm-simulator",
+  "path_key": "karpathy-llm-simulator",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-llm-simulator",
+    "branch": null
+  }
+}

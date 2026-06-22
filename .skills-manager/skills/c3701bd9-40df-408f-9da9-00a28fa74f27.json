@@ -4,7 +4,9 @@
   "path": "openspec-implementation-cn",
   "path_key": "openspec-implementation-cn",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "openspec"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "forztf/open-skilled-sdd/openspec-implementation-cn",

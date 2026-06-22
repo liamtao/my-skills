@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "92bbafc7-057c-484d-a842-2804c4c0d816",
+  "path": "receiving-code-review",
+  "path_key": "receiving-code-review",
+  "enabled": true,
+  "tags": [
+    "superpowers"
+  ],
+  "source": {
+    "type": "skillssh",
+    "ref": "obra/superpowers/receiving-code-review",
+    "subpath": "skills/receiving-code-review",
+    "branch": null
+  }
+}

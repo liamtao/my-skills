@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "5e285a3c-8f80-4cfd-bd1c-f216d081404c",
+  "path": "karpathy-meta-reflection",
+  "path_key": "karpathy-meta-reflection",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-meta-reflection",
+    "branch": null
+  }
+}

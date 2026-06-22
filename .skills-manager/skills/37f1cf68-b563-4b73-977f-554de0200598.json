@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "37f1cf68-b563-4b73-977f-554de0200598",
+  "path": "karpathy-methodology",
+  "path_key": "karpathy-methodology",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-methodology",
+    "branch": null
+  }
+}

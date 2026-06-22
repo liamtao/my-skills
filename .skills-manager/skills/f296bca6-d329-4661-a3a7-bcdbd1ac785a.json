@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "f296bca6-d329-4661-a3a7-bcdbd1ac785a",
+  "path": "karpathy-llm-wiki",
+  "path_key": "karpathy-llm-wiki",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-llm-wiki",
+    "branch": null
+  }
+}

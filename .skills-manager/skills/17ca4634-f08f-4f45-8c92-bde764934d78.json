@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "17ca4634-f08f-4f45-8c92-bde764934d78",
+  "path": "handoff-2",
+  "path_key": "handoff-2",
+  "enabled": true,
+  "tags": [
+    "Agentmemory"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/rohitg00/agentmemory.git",
+    "subpath": "plugin/skills/handoff",
+    "branch": null
+  }
+}

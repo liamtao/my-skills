@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "5b510b5c-9d86-4e74-9076-8e0767660df2",
+  "path": "recall",
+  "path_key": "recall",
+  "enabled": true,
+  "tags": [
+    "Agentmemory"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/rohitg00/agentmemory.git",
+    "subpath": "plugin/skills/recall",
+    "branch": null
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "8b78c061-030b-4a69-850c-d5985cdd8f3a",
+  "name": "AgentMemory",
+  "description": null,
+  "icon": "brain",
+  "sort_order": 999
+}

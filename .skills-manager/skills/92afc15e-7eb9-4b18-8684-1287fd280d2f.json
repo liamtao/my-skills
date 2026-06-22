@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "92afc15e-7eb9-4b18-8684-1287fd280d2f",
+  "path": "commit-context",
+  "path_key": "commit-context",
+  "enabled": true,
+  "tags": [
+    "Agentmemory"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/rohitg00/agentmemory.git",
+    "subpath": "plugin/skills/commit-context",
+    "branch": null
+  }
+}

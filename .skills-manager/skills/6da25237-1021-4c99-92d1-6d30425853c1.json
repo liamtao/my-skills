@@ -4,7 +4,9 @@
   "path": "openspec-proposal-creation-cn",
   "path_key": "openspec-proposal-creation-cn",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "openspec"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "forztf/open-skilled-sdd/openspec-proposal-creation-cn",

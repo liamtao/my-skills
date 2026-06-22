@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "5f7bc3b9-5ecc-44c0-8ceb-06a3124a8537",
+  "path": "to-issues",
+  "path_key": "to-issues",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "skillssh",
+    "ref": "camacho/ai-skills/to-issues",
+    "subpath": "skills/to-issues",
+    "branch": null
+  }
+}

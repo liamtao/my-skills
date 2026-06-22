@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "53efd2cc-c472-4c68-95b8-c22f1cb69c11",
+  "path": "karpathy-supply-chain-hygiene",
+  "path_key": "karpathy-supply-chain-hygiene",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-supply-chain-hygiene",
+    "branch": null
+  }
+}

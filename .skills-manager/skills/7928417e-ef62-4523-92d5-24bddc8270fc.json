@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "7928417e-ef62-4523-92d5-24bddc8270fc",
+  "path": "karpathy-output-evolution",
+  "path_key": "karpathy-output-evolution",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-output-evolution",
+    "branch": null
+  }
+}

@@ -5,6 +5,9 @@
   "sort_order": 0,
   "tools": {
     "antigravity": true,
+    "antigravity_2": true,
+    "antigravity_2_0": true,
+    "antigravity_cli": true,
     "claude_code": true,
     "codex": true
   }

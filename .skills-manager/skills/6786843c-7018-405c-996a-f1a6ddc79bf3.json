@@ -4,7 +4,9 @@
   "path": "openspec",
   "path_key": "openspec",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "openspec"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "itechmeat/llm-code/openspec",

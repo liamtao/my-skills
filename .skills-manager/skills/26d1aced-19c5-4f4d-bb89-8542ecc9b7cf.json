@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "26d1aced-19c5-4f4d-bb89-8542ecc9b7cf",
+  "path": "karpathy-agentic-engineering",
+  "path_key": "karpathy-agentic-engineering",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-agentic-engineering",
+    "branch": null
+  }
+}

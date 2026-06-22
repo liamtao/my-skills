@@ -4,7 +4,9 @@
   "path": "openspec-archiving-cn",
   "path_key": "openspec-archiving-cn",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "openspec"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "forztf/open-skilled-sdd/openspec-archiving-cn",

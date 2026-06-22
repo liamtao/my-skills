@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "01ad1940-fbf5-4e1c-a48c-50cdf837f1f7",
+  "path": "recap",
+  "path_key": "recap",
+  "enabled": true,
+  "tags": [
+    "Agentmemory"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/rohitg00/agentmemory.git",
+    "subpath": "plugin/skills/recap",
+    "branch": null
+  }
+}

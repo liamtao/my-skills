@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "scenario_id": "e0453a1d-67d9-424f-81ec-458bde098f74",
+  "skill_id": "9b055f90-7e91-4bfd-8d48-bb108e6bab6f",
+  "sort_order": 2,
+  "tools": {
+    "antigravity": true,
+    "antigravity_2": true,
+    "antigravity_2_0": true,
+    "antigravity_cli": true,
+    "claude_code": true,
+    "codex": true
+  }
+}

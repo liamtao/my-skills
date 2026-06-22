@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "81b0151f-e6ff-4669-86f5-315c82d56466",
+  "path": "karpathy-autoresearch",
+  "path_key": "karpathy-autoresearch",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-autoresearch",
+    "branch": null
+  }
+}

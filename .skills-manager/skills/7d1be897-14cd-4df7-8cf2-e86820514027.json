@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "7d1be897-14cd-4df7-8cf2-e86820514027",
+  "path": "session-history",
+  "path_key": "session-history",
+  "enabled": true,
+  "tags": [
+    "Agentmemory"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/rohitg00/agentmemory.git",
+    "subpath": "plugin/skills/session-history",
+    "branch": null
+  }
+}

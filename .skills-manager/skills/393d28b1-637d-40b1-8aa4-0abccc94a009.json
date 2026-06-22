@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "393d28b1-637d-40b1-8aa4-0abccc94a009",
+  "path": "karpathy-minimalism",
+  "path_key": "karpathy-minimalism",
+  "enabled": true,
+  "tags": [
+    "Karpathy"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/andrej-karpathy-skills.git",
+    "subpath": "karpathy-minimalism",
+    "branch": null
+  }
+}

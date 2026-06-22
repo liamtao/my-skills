@@ -4,7 +4,9 @@
   "path": "openspec-context-loading-cn",
   "path_key": "openspec-context-loading-cn",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "openspec"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "forztf/open-skilled-sdd/openspec-context-loading-cn",
