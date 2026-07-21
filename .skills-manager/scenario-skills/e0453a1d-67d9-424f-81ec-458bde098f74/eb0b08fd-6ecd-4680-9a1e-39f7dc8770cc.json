@@ -2,7 +2,7 @@
   "schema_version": 1,
   "scenario_id": "e0453a1d-67d9-424f-81ec-458bde098f74",
   "skill_id": "eb0b08fd-6ecd-4680-9a1e-39f7dc8770cc",
-  "sort_order": 5,
+  "sort_order": 7,
   "tools": {
     "antigravity": true,
     "antigravity_2": true,
@@ -10,6 +10,8 @@
     "antigravity_cli": true,
     "claude_code": true,
     "cline": true,
-    "codex": true
+    "codex": true,
+    "qwen_code": true,
+    "warp": true
   }
 }

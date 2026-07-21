@@ -1,0 +1,25 @@
+{
+  "changelists": [
+    {
+      "name": "Default",
+      "files": [
+        ".skills-manager/scenario-skills/e0453a1d-67d9-424f-81ec-458bde098f74/9b055f90-7e91-4bfd-8d48-bb108e6bab6f.json",
+        ".skills-manager/scenario-skills/e0453a1d-67d9-424f-81ec-458bde098f74/ae74ec25-bcd3-43de-bbaf-d0a359a75a4b.json",
+        ".skills-manager/scenario-skills/e0453a1d-67d9-424f-81ec-458bde098f74/bb4e5b90-9e82-4e2f-8242-baef5c39dfca.json",
+        ".skills-manager/scenario-skills/e0453a1d-67d9-424f-81ec-458bde098f74/c2da62fd-ac8e-4142-82f2-bd6ce5e8c3d9.json",
+        ".skills-manager/scenario-skills/e0453a1d-67d9-424f-81ec-458bde098f74/eb0b08fd-6ecd-4680-9a1e-39f7dc8770cc.json",
+        ".skills-manager/scenario-skills/e0453a1d-67d9-424f-81ec-458bde098f74/f7f5f5e0-16b6-4387-b209-daea0d7d747d.json",
+        ".skills-manager/skills/2384a597-bcf7-4701-b1be-1ccbad763c0e.json",
+        ".skills-manager/skills/49d5d476-b5c5-4bad-b93f-88aff0c77ab1.json",
+        ".skills-manager/skills/9b055f90-7e91-4bfd-8d48-bb108e6bab6f.json",
+        ".skills-manager/skills/ae0697d2-d447-409a-bcb1-8f8439ae8366.json",
+        ".skills-manager/skills/ae74ec25-bcd3-43de-bbaf-d0a359a75a4b.json",
+        ".skills-manager/skills/eb0b08fd-6ecd-4680-9a1e-39f7dc8770cc.json",
+        "grilling/SKILL.md",
+        ".skills-manager/scenario-skills/e0453a1d-67d9-424f-81ec-458bde098f74/2384a597-bcf7-4701-b1be-1ccbad763c0e.json",
+        ".skills-manager/scenario-skills/e0453a1d-67d9-424f-81ec-458bde098f74/49d5d476-b5c5-4bad-b93f-88aff0c77ab1.json"
+      ]
+    }
+  ],
+  "active": "Default"
+}

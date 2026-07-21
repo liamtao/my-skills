@@ -4,7 +4,9 @@
   "path": "handoff",
   "path_key": "handoff",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Mattpocock"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "mattpocock/skills/handoff",
