@@ -240,6 +240,11 @@ LLM 全称 Large Language Model，[[cue:bigmodel]]它是一个有几千亿参数
           end: number,
           absoluteStart: number,   // 整轨绝对时间（对齐 voiceover.mp3）
           absoluteEnd: number,
+          // words: 字级时间戳（TTS enable_subtitle 实测返回，默认带；--no-timestamps 关闭）
+          // 注意 text 是 TN 后文本（"2025"→"二零二五"），标点附在前一个字上
+          words: [
+            { text: string, start: number, end: number, absoluteStart: number, absoluteEnd: number }
+          ],
         }
       ],
       cues: [
@@ -283,6 +288,17 @@ const { NarrationStage, Subtitles } = NarrationStageLib;
 | 切句规则 | **绝不跨句号截断**：先按 `。！？` 切句，每句再按 `，、；：` 合并到 ≤maxLen | 按字数硬切，把「这是好的」切成「这是好」+「的」 |
 
 `<Subtitles />` 默认按以上规则跑，不需要传 props。深底场景：`<Subtitles color="#fff" haloColor="rgba(0,0,0,0.85)" />`。
+
+### 卡拉OK模式（字级高亮）
+
+```jsx
+<Subtitles karaoke />                          {/* 读到哪个字哪个字变品牌橙 #e8590c */}
+<Subtitles karaoke karaokeColor="#0a84ff" />   {/* 自定义高亮色 */}
+```
+
+- 依赖 timeline chunks 里的 `words` 字级时间戳（narrate-pipeline.mjs 默认输出；豆包 TTS v3 `enable_subtitle`，需 2.0 资源，仅中英文）
+- 整行显示、逐字变色，行切分复用 ≤maxLen + 不跨句号规则（由 words 拼行，与发音严格对齐）
+- chunk 没有 words 时自动回落普通 chunk 模式，调用方无需判断
 
 ### 切句算法（已在 narration_stage.jsx 内置）
 
@@ -354,13 +370,20 @@ NarrationStage 自动检测 `window.__recording`：
 skill 根目录下 `.env`（已 gitignore）：
 
 ```
-DOUBAO_TTS_API_KEY=<your_key>
-DOUBAO_TTS_VOICE_ID=<your_clone_voice_id>
-DOUBAO_TTS_CLUSTER=volcano_icl
-DOUBAO_TTS_ENDPOINT=https://openspeech.bytedance.com/api/v1/tts
+DOUBAO_TTS_API_KEY=<your_api_key>
+DOUBAO_TTS_VOICE_ID=zh_female_xiaohe_uranus_bigtts
+DOUBAO_TTS_ENDPOINT=https://openspeech.bytedance.com/api/v3/tts/unidirectional
 ```
 
-参考 `.env.example` 模板。豆包语音克隆音色 ID 在火山引擎控制台获取。
+也可使用控制台的 App ID + Access Token 鉴权：
+
+```
+DOUBAO_APP_ID=<your_app_id>
+DOUBAO_ACCESS_KEY=<your_access_token>
+DOUBAO_TTS_VOICE_ID=zh_female_xiaohe_uranus_bigtts
+```
+
+`DOUBAO_TTS_RESOURCE_ID` 默认按音色自动推断：`S_` 克隆音色使用 `seed-icl-1.0`，`uranus` 官方音色使用 `seed-tts-2.0`，其他官方音色使用 `seed-tts-1.0`。
 
 ## 标准工作流（10 步）
 
@@ -379,7 +402,7 @@ DOUBAO_TTS_ENDPOINT=https://openspeech.bytedance.com/api/v1/tts
 
 | 问题 | 解决 |
 |---|---|
-| TTS API 报错 | 检查 .env 里 `DOUBAO_TTS_API_KEY` 是否正确 |
+| TTS API 报错 | 检查 .env 里 `DOUBAO_TTS_API_KEY`，或 `DOUBAO_APP_ID` + `DOUBAO_ACCESS_KEY` 是否正确 |
 | 某段音频明显比脚本长/短 | 该段文本里有奇怪标点或 emoji，TTS 解析异常 → 改稿 |
 | cue absoluteTime 不准 | 段内子段拼接时 ffmpeg 有问题 → 检查 mp3 编码一致性 |
 | 录视频结果有黑屏 | render-video.js 没拿到 `window.__ready` 信号 → 检查 NarrationStage 是否正常挂载 |

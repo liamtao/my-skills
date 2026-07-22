@@ -4,7 +4,9 @@
   "path": "gsap-performance",
   "path_key": "gsap-performance",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "gasp"
+  ],
   "source": {
     "type": "local",
     "ref": null,

@@ -4,10 +4,12 @@
   "path": "improve-codebase-architecture",
   "path_key": "improve-codebase-architecture",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Mattpocock"
+  ],
   "source": {
-    "type": "skillssh",
-    "ref": "mattpocock/skills/improve-codebase-architecture",
+    "type": "git",
+    "ref": "https://github.com/mattpocock/skills",
     "subpath": "skills/engineering/improve-codebase-architecture",
     "branch": null
   }

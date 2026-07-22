@@ -8,8 +8,8 @@
     "Mattpocock"
   ],
   "source": {
-    "type": "skillssh",
-    "ref": "mattpocock/skills/domain-modeling",
+    "type": "git",
+    "ref": "https://github.com/mattpocock/skills",
     "subpath": "skills/engineering/domain-modeling",
     "branch": null
   }

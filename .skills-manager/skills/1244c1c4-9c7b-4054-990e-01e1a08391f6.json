@@ -4,7 +4,9 @@
   "path": "gsap-plugins",
   "path_key": "gsap-plugins",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "gasp"
+  ],
   "source": {
     "type": "local",
     "ref": null,

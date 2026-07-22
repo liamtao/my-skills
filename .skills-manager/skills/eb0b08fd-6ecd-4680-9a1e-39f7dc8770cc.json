@@ -8,8 +8,8 @@
     "Mattpocock"
   ],
   "source": {
-    "type": "skillssh",
-    "ref": "mattpocock/skills/grill-with-docs",
+    "type": "git",
+    "ref": "https://github.com/mattpocock/skills",
     "subpath": "skills/engineering/grill-with-docs",
     "branch": null
   }

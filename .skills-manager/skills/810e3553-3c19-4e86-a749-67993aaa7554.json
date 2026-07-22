@@ -4,7 +4,9 @@
   "path": "gsap-timeline",
   "path_key": "gsap-timeline",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "gasp"
+  ],
   "source": {
     "type": "local",
     "ref": null,

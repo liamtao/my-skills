@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "f7660e7f-12f3-4346-b952-3fc6abba7282",
+  "path": "to-spec",
+  "path_key": "to-spec",
+  "enabled": true,
+  "tags": [
+    "Mattpocock"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/mattpocock/skills",
+    "subpath": "skills/engineering/to-spec",
+    "branch": null
+  }
+}

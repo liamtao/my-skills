@@ -4,7 +4,9 @@
   "path": "gsap-frameworks",
   "path_key": "gsap-frameworks",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "gasp"
+  ],
   "source": {
     "type": "local",
     "ref": null,

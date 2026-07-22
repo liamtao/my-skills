@@ -4,10 +4,12 @@
   "path": "ask-matt",
   "path_key": "ask-matt",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Mattpocock"
+  ],
   "source": {
-    "type": "skillssh",
-    "ref": "mattpocock/skills/ask-matt",
+    "type": "git",
+    "ref": "https://github.com/mattpocock/skills",
     "subpath": "skills/engineering/ask-matt",
     "branch": null
   }
