@@ -17,6 +17,7 @@
     "qwen_code": true,
     "trae": true,
     "warp": true,
-    "windsurf": true
+    "windsurf": true,
+    "workbuddy": true
   }
 }

@@ -9,6 +9,7 @@
     "antigravity_cli": true,
     "claude_code": true,
     "codex": true,
-    "qwen_code": true
+    "qwen_code": true,
+    "workbuddy": true
   }
 }

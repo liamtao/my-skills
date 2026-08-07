@@ -12,6 +12,7 @@
     "cline": true,
     "codex": true,
     "qwen_code": true,
-    "warp": true
+    "warp": true,
+    "workbuddy": true
   }
 }
