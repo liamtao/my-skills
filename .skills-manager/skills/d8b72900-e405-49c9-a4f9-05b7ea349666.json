@@ -4,7 +4,9 @@
   "path": "pick-ui-library",
   "path_key": "pick-ui-library",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Animation"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/emilkowalski/skills",

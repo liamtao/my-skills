@@ -4,7 +4,9 @@
   "path": "animation-vocabulary",
   "path_key": "animation-vocabulary",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Animation"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/emilkowalski/skills",

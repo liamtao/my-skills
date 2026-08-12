@@ -4,7 +4,9 @@
   "path": "improve-animations",
   "path_key": "improve-animations",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Animation"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/emilkowalski/skills",

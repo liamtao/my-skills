@@ -4,7 +4,9 @@
   "path": "apple-design",
   "path_key": "apple-design",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Animation"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/emilkowalski/skills",

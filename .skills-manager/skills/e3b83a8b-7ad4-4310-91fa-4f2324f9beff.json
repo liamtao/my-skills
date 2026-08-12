@@ -4,7 +4,9 @@
   "path": "review-animations",
   "path_key": "review-animations",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Animation"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/emilkowalski/skills",

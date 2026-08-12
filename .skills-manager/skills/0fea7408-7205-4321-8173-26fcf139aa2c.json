@@ -4,7 +4,9 @@
   "path": "animate",
   "path_key": "animate",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Animation"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/emilkowalski/skills",

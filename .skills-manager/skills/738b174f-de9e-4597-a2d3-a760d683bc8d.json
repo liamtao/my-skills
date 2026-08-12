@@ -4,7 +4,9 @@
   "path": "ask-sonner",
   "path_key": "ask-sonner",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Animation"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/emilkowalski/skills",

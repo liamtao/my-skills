@@ -4,7 +4,9 @@
   "path": "find-animation-opportunities",
   "path_key": "find-animation-opportunities",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Animation"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/emilkowalski/skills",
