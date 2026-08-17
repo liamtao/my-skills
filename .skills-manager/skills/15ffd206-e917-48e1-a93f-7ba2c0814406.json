@@ -4,7 +4,9 @@
   "path": "sigma",
   "path_key": "sigma",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Tagged"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "sanyuan0704/sanyuan-skills/sigma",

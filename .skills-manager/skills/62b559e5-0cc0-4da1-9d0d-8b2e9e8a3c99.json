@@ -4,7 +4,9 @@
   "path": "agent-reach",
   "path_key": "agent-reach",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Tagged"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "panniantong/agent-reach/agent-reach",

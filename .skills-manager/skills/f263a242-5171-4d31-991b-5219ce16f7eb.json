@@ -4,7 +4,9 @@
   "path": "run-issues",
   "path_key": "run-issues",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Tagged"
+  ],
   "source": {
     "type": "import",
     "ref": null,

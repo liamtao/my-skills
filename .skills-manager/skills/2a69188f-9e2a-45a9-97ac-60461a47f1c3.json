@@ -4,7 +4,9 @@
   "path": "impeccable",
   "path_key": "impeccable",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Tagged"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "pbakaus/impeccable/impeccable",

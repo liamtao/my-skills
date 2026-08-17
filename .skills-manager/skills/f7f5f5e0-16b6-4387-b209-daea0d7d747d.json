@@ -4,7 +4,9 @@
   "path": "recording-decisions",
   "path_key": "recording-decisions",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Tagged"
+  ],
   "source": {
     "type": "import",
     "ref": null,

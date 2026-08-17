@@ -4,7 +4,9 @@
   "path": "bb-browser",
   "path_key": "bb-browser",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Tagged"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "epiral/bb-browser/bb-browser",

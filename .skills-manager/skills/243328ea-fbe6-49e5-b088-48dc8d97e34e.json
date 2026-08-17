@@ -4,7 +4,9 @@
   "path": "agent-browser",
   "path_key": "agent-browser",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Tagged"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "vercel-labs/agent-browser/agent-browser",

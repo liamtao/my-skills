@@ -4,7 +4,9 @@
   "path": "humanizer-zh",
   "path_key": "humanizer-zh",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Tagged"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "op7418/humanizer-zh/humanizer-zh",
