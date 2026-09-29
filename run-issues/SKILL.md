@@ -91,10 +91,18 @@ Call it once per ticket and branch on the exit code:
 | 2 | not `ready-for-agent`, skipped | Fine — say so and continue |
 | 3 | verify command fails | **Stop the chain.** Read the `.verify.log`, report it |
 | 4 | session ended without marking it done | **Stop the chain.** Read the session's closing message |
+| 5 | the session died before its own end; verify never ran | **Stop the chain.** Usually external — rate limit, spend cap, bad model. Re-run the same ticket |
 
-Stop on 3 and 4 rather than pressing on. Later tickets are built on the assumption that earlier
+Stop on 3, 4 and 5 rather than pressing on. Later tickets are built on the assumption that earlier
 ones landed, so continuing past a failure means the next session starts from a broken base and its
 own failure tells you nothing about its own work.
+
+**Code 5 is the one worth re-running unchanged.** 3 and 4 mean the session reached its own end and
+the work is wrong or incomplete, so re-running blind repeats it. 5 means the session was killed
+from outside — an API error, a rate limit, a spend cap — after some number of turns it never got to
+finish, so the ticket is untouched or half-touched and the honest move is to check what landed and
+run it again. There is **no `.verify.log`** for a code-5 stop, on purpose: a dead session changed
+nothing, so verify would have passed and left a green log beside a run that did no work.
 
 Pass `--model` only if the user asked for a specific one.
 
@@ -123,7 +131,8 @@ tracked — the tickets and the spec belong in git — and these transcripts do 
 megabytes each, because every tool result the session saw is in them verbatim.
 
 **Reading them.** For a code-3 or code-4 stop, read the `.verify.log` first: it is small and it
-is usually the whole answer. Reach for the `.jsonl` only when the verify log does not explain
+is usually the whole answer. For a code-5 stop there is no verify log at all; the runner prints the
+session's own last words instead, and that is normally the whole answer. Reach for the `.jsonl` only when the verify log does not explain
 the failure, and even then query it rather than reading it — `jq -r 'select(.type=="result") |
 .result' <file>` gives the session's own closing account in a few hundred tokens. Never read one
 whole. Pulling a megabyte of another session's tool output into this one undoes the context
