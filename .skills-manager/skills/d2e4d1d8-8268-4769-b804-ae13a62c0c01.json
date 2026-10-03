@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "d2e4d1d8-8268-4769-b804-ae13a62c0c01",
+  "path": "herdr",
+  "path_key": "herdr",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/herdrdev/herdr",
+    "subpath": "skills/herdr",
+    "branch": null
+  }
+}
