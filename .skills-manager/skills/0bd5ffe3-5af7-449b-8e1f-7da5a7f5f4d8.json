@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "0bd5ffe3-5af7-449b-8e1f-7da5a7f5f4d8",
+  "path": "chief-of-staff",
+  "path_key": "chief-of-staff",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/mattpocock/skills",
+    "subpath": "skills/in-progress/chief-of-staff",
+    "branch": null
+  }
+}

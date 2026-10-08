@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "4520ddd1-68cd-4e3a-84d5-f4b407ce475a",
+  "path": "migrate-to-shoehorn",
+  "path_key": "migrate-to-shoehorn",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/mattpocock/skills",
+    "subpath": "skills/misc/migrate-to-shoehorn",
+    "branch": null
+  }
+}

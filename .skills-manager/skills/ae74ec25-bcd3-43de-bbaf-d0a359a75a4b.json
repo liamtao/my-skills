@@ -8,8 +8,8 @@
     "Mattpocock"
   ],
   "source": {
-    "type": "skillssh",
-    "ref": "mattpocock/skills/grill-me",
+    "type": "git",
+    "ref": "https://github.com/mattpocock/skills",
     "subpath": "skills/productivity/grill-me",
     "branch": null
   }

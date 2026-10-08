@@ -9,7 +9,7 @@
   ],
   "source": {
     "type": "git",
-    "ref": "https://github.com/mattpocock/skills.git",
+    "ref": "https://github.com/mattpocock/skills",
     "subpath": "skills/productivity/grilling",
     "branch": null
   }

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "5dacafb3-5b12-43df-a39d-41cf392968f7",
+  "path": "pr",
+  "path_key": "pr",
+  "enabled": true,
+  "tags": [
+    "Mattpocock"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/mattpocock/skills",
+    "subpath": "skills/engineering/pr",
+    "branch": null
+  }
+}
