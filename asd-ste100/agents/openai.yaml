@@ -1,0 +1,4 @@
+interface:
+  display_name: "ASD-STE100 文档写作"
+  short_description: "用 18 条 STE 衍生原则起草、改写和审校清晰易懂的中英文文档"
+  default_prompt: "请使用 $asd-ste100 起草或改写以下文档，保留原意、必要条件和不确定性，提升清晰度与术语一致性。"

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "c5ed5136-b8cc-49d0-a7f2-a3d2f33a1778",
+  "path": "asd-ste100",
+  "path_key": "asd-ste100",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
