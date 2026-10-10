@@ -11,6 +11,7 @@
     "claude_code": true,
     "cline": true,
     "codex": true,
+    "opencode": true,
     "qwen_code": true,
     "warp": true,
     "workbuddy": true

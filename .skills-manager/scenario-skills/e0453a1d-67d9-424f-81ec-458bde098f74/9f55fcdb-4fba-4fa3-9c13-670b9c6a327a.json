@@ -14,6 +14,7 @@
     "continue": true,
     "gemini_cli": true,
     "github_copilot": true,
+    "opencode": true,
     "qwen_code": true,
     "trae": true,
     "warp": true,

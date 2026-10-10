@@ -9,6 +9,7 @@
     "antigravity_cli": true,
     "claude_code": true,
     "codex": true,
+    "opencode": true,
     "qwen_code": true,
     "warp": true,
     "workbuddy": true
