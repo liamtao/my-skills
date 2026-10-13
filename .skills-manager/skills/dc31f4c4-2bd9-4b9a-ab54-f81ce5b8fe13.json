@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "dc31f4c4-2bd9-4b9a-ab54-f81ce5b8fe13",
+  "path": "linear-create-issue",
+  "path_key": "linear-create-issue",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
