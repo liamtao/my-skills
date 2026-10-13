@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "d160da8b-a8d7-416c-9587-db2937880e9b",
+  "path": "linear-delivery-comment",
+  "path_key": "linear-delivery-comment",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
