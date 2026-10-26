@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "97942a3a-a9d7-4aec-a9c7-2e0e3a1a28e1",
+  "path": "pdf-to-interactive-web",
+  "path_key": "pdf-to-interactive-web",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "skillssh",
+    "ref": "ai-azhou/pdf-to-interactive-web/pdf-to-interactive-web",
+    "subpath": "skills/pdf-to-interactive-web",
+    "branch": null
+  }
+}
