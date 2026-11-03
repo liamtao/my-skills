@@ -1,38 +1,41 @@
 #!/usr/bin/env node
 // 给设计小样截图、录屏和做基本检查。只依赖 Node 22+ 和本机的 Chrome / Chromium / Edge。
 // 用法见 references/tools.md；`node shoot.mjs --help` 打印同样的说明。
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createServer } from "node:http";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, isAbsolute, join, parse, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { createChrome } from "./chrome.mjs";
+
 const HELP = `常用命令：
   node scripts/shoot.mjs page.html --size desktop --out shots
   node scripts/shoot.mjs page.html --size desktop --steps "click .nav button; wait 300" --out shots
-  node scripts/shoot.mjs page.html --size desktop --states idle,done --evidence --steps "send: click text=Send" --out evidence
+  node scripts/shoot.mjs page.html --size desktop --frames 8 --steps "send: click text=Send" --out evidence
 
 用法：node shoot.mjs <页面地址、文件、manifest.json 或目录> [...] [选项]
 多个本地 HTML 也可用逗号分隔；多目标共用服务器和浏览器，默认生成带名称的 sheet.png。
 
   --out <目录>          输出目录，默认 ./shots
+  --root <目录>         本地页面的静态服务根目录，默认按页面和 cwd 推断；共享资源用项目根
   --size <尺寸,...>     默认 390x844；desktop=1440x900，phone/mobile=390x844，可混用数字尺寸
   --states <a,b,...>    依次用 ?state=<名字> 打开并各截一张
   --param <名字>        状态参数名，默认 state
   --query <查询参数>    给地址加参数，例如 --query "a=1&b=2"；可和 --states 一起用
   --zoom <倍数,...>     默认 1；例如 --zoom 1,2，每个倍数各出一套；配 --evidence 时覆盖默认截图倍数
   --full                截整页，默认只截视口
-  --selector <选择器>   只截匹配元素的区域，自动滚入视口；不与 --full、--record、--motion、--entry、--evidence 同用
-  --thumb               快速缩略图：按 0.5 倍分辨率截视口，缩短等待并跳过默认做法检查
+  --selector <选择器>   只截匹配元素的区域，自动滚入视口；不与 --full、--record、--frames、--motion、--entry、--evidence 同用
+  --thumb               快速缩略图：按 0.5 倍分辨率截视口，缩短等待并跳过可读性检查
   --mask                另截一份遮掉全部文字的版本
   --sheet               把状态拼成并排图，配合 --mask 再拼遮字版
   --no-sheet            多目标截图时不自动生成 sheet.png
   --mark "1=<选择器>;..." 给匹配的元素画框和编号，另出标注版；不写编号时按顺序编号
-  --steps "<动作>"      可写多次，每组从重新打开的页面开始；可起名："open: click .open"
+  --steps "<动作>"      可写多次，每组从重新打开的页面开始；组名前可写任意文字和冒号："编辑并保存: click .save"
   --record              每组录屏并留最后一个变化动作的三帧；无名组沿用 record.mp4、motion-start/mid/end.jpg
-  --entry               配合 --record，先开录再打开页面，录首次出场
+  --entry               配合 --record 或 --frames，先取帧再打开页面，捕捉首次出场
   --hold <毫秒>         动作结束后再录多久，默认 1200
   --motion              探测首次进入、动作反馈、首屏滚动和从头滚到底的动效；单屏跳过滚动
   --evidence            一次取齐状态截图、并排图和遮字并排图、首状态 2 倍图、动效探测、
@@ -42,7 +45,19 @@ const HELP = `常用命令：
   --timeout-scale <倍数> 整体放宽协议、启动和编码超时，例如 --timeout-scale 2；默认 1
   --dry-run             只检查选项和动作写法，输出解析 JSON，不启动浏览器
   --stitch <图片>       拼图，不需要页面：可写多次，每张后面可接 --label <标注>；输出 stitch.png，--columns <列数> 默认 2
-  --frames <帧数>       配合 --record，另出 motion[-组名]-sequence.png：均匀取 2–120 帧并标时间，默认最多 4 列，--columns 可改
+  --match-width <像素>  跟在各张 --stitch 后，填同一共有元素在该原图里的像素宽；统一到首图元素宽，所有图都要填
+  --scale <倍数>        跟在 --stitch 后，显式缩放该图，未填的为 1；不与 --match-width 混用
+  --crop <x,y,宽,高>   拼图统一缩放后，从每张图左上角起裁同一矩形；全局只写一次，不含标注，超出任一图时报错
+  --frames <帧数>       只出 motion[-组名]-sequence.png：均匀取 2–120 帧并标时间，不编码视频；加 --record 才同时出视频
+                        默认最多 4 列，--columns 可改；--evidence 配 --frames 也用序列图代替视频
+
+同一比例并排对照（图片路径有空格时加引号）：
+  node scripts/shoot.mjs --stitch ref.png --match-width 240px --label 参考 --stitch shot.png --match-width 300 --label 当前 --crop "0,0,800,600" --out shots
+  node scripts/shoot.mjs --stitch ref.png --scale 1 --stitch shot.png --scale 80% --crop "0 0 800 600" --out shots
+  --match-width 量的是原图中的共有元素，不是整张图片宽；工具不自动识别元素。
+  --scale 接受 0.8、0.8x、80% 或 4/5；--crop 接受逗号、空格或 × 分隔，数值可带 px。
+  先统一比例，再按 --crop 裁切，最后整组一起缩小到预览尺寸；不会把每张图各自拉成等宽。
+  不写 --match-width / --scale / --crop 时保留原拼图方式：每张图各自等比缩小。report.json 记录实际缩放与裁切。
 
 动作写法（用分号分隔；引号、方括号、圆括号里的分号不拆）：
   click <选择器> | hover <选择器> | dblclick <选择器> | waitfor <选择器>
@@ -66,7 +81,7 @@ const HELP = `常用命令：
   选择器只在主文档里找，不进入 iframe 或 Shadow DOM；找不到时报告 iframe 和开放 shadow root 数量。
 
 选项都可写成 --名字=值 或 --名字 值；开关不带值。重复状态、尺寸和倍数会去重；文件名冲突会自动加编号。
-数值选项 --hold、--wait、--zoom、--timeout-scale 也可连写，例如 --hold1000。
+数值选项 --hold、--wait、--zoom、--timeout-scale、--match-width、--scale 也可连写，例如 --hold1000、--scale0.8。
 元素匹配多个时取第一个可见的；匹配到但隐藏时说明原因，并给可见元素的写法。
 点击、双击和悬停前检查中心点遮挡和禁用状态；提示写进输出和 report.json 的问题汇总，动作照常执行，返回码不变。
 截图单次最多等 90 秒，其他 CDP 请求默认等 30 秒。
@@ -74,7 +89,7 @@ const HELP = `常用命令：
 重跑后截图仍超时则继续后面的项，返回码 1；其他协议超时或浏览器意外断开时退出。
 多项命令每完成一项向标准错误打印进度，标准输出仍是最后的汇总。
 每张图检查控制台错误、横向溢出和加载失败的图片，明细写进 report.json；
-默认做法和可读性提示写进 lint 字段。录屏需要 ffmpeg，没有时只留帧。
+可读性与渲染提示写进 lint 字段。录屏需要 ffmpeg，没有时只留帧。
 
 和 --states 一起用：
   普通截图会在每个状态执行每组 --steps；动效探测和动作录屏只从第一个状态、第一种尺寸开始，
@@ -86,8 +101,9 @@ const HELP = `常用命令：
   <状态>.png，遮字版 <状态>-masked.png，标注版 <状态>-marked.png，并排图 sheet.png 和 sheet-masked.png，
   还原比对 <状态>-compare.png（四格依次是参考、当前、叠加和差异热图）。多个倍数各出一套，2 倍的文件名带 @2x。
   @2x 是同一个视口用 2 倍像素密度截的图，页面布局不变，不是把页面放大到 200% 后的重排。
-  录屏：单个无名组是 record.mp4 和 motion-start/mid/end.jpg；具名或多组是 record-<组名>.mp4
-  和 motion-<组名>-start/mid/end.jpg；首次出场是 record-entry.mp4 和 motion-entry-start/mid/end.jpg。
+  录屏：单个无名组是 record.mp4 和 motion-start/mid/end.jpg；具名或多组是 record-<安全组名>.mp4
+  和 motion-<安全组名>-start/mid/end.jpg；首次出场是 record-entry.mp4 和 motion-entry-start/mid/end.jpg。
+  组名中的文件名非法字符会替换为连字符，空白变为连字符，重名文件名自动加编号；--help 和 report.json 保留原组名。
   report.json 的最外层是数组，每个元素是一张图或一项检查的结果；lint、motion、issues 在各个元素里。结构示意：
   [{"file":"idle.png","lint":[],"issues":[]},
    {"file":"motion-probe","motion":{},"issues":[]}]
@@ -105,11 +121,36 @@ const HELP = `常用命令：
   --compare 先用 --size 设成参考图的逻辑尺寸，例如 2880 宽的 2 倍图用 1440 宽；
   差异占比只用来找先修哪一块、看修改有没有让差异变少，不是还原度的分数。
   --motion 只说明动了没有、动了多少：首次进入没有动画、动作没有反馈、从头滚到底没有变化会记为问题；
+  没有配 --steps 时，如果动效由点击等交互触发，提示会说明需要配 --steps 才能探测；
   页面不能滚动时跳过滚动检查；Canvas 和 WebGL 里的动画可能探测不到，以录屏为准。
   本地文件会用只监听本机的临时服务器打开；地址里带 ? 或 & 时加引号，或改用 --query。
   WebGL 页面在没有显卡的机器上改用软件渲染；画布没能创建绘图上下文时会记为问题，这时截图是空的。`;
 
 function fail(message) { console.error(`shoot：${message}`); process.exit(1); }
+const STITCH_EXAMPLE = 'node scripts/shoot.mjs --stitch ref.png --match-width 240 --stitch shot.png --match-width 300 --crop "0,0,800,600" --out shots';
+const SCALE_EXAMPLE = 'node scripts/shoot.mjs --stitch ref.png --scale 1 --stitch shot.png --scale 80% --out shots';
+function stitchNumber(value, key) {
+  let text = value.trim().toLowerCase(), factor = 1;
+  const example = key === "scale" ? SCALE_EXAMPLE : STITCH_EXAMPLE;
+  if (key === "scale") {
+    if (text.endsWith("%")) { factor = .01; text = text.slice(0, -1).trim(); }
+    else text = text.replace(/\s*(?:x|×|倍)$/, "").trim();
+  } else text = text.replace(/\s*px$/, "").trim();
+  const number = /^(?:\d+(?:\.\d*)?|\.\d+)$/;
+  const parts = key === "scale" ? text.split("/").map((part) => part.trim()) : [text];
+  const n = parts.every((part) => number.test(part)) && parts.length <= 2 ? Number(parts[0]) / (parts.length === 2 ? Number(parts[1]) : 1) * factor : NaN;
+  if (!Number.isFinite(n) || n <= 0) fail(`--${key} 需要正数，收到 ${value}；例如 ${example}`);
+  return n;
+}
+function stitchCrop(value) {
+  const parts = value.trim().replace(/(\d)\s*px(?=\s|[,，x×)\]]|$)/gi, "$1").replace(/^[[(]\s*|\s*[\])]$/g, "").trim().split(/[\s,，x×]+/i);
+  const numbers = parts.map(Number);
+  if (parts.length !== 4 || parts.some((part) => !/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(part)) || numbers.some((n) => !Number.isFinite(n)) || numbers[2] <= 0 || numbers[3] <= 0) {
+    fail(`--crop 需要非负 x、y 和正的宽、高，收到 ${value}；例如 ${STITCH_EXAMPLE}`);
+  }
+  const [x, y, width, height] = numbers;
+  return { x, y, width, height };
+}
 function distance(a, b) {
   let row = Array.from({ length: b.length + 1 }, (_, i) => i);
   for (let i = 0; i < a.length; i++) {
@@ -166,8 +207,22 @@ function parseSelector(source) {
 }
 function parseSteps(text) {
   let name = null;
-  const named = text.match(/^([A-Za-z0-9_-]+):\s+([\s\S]*)$/);
-  if (named) { name = named[1]; text = named[2]; }
+  let quote = null, stack = [], split = null;
+  const actions = [...ACTIONS, ...Object.keys(ALIASES)];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === "\\") { i++; continue; }
+    if (quote) { if (c === quote) quote = null; continue; }
+    if (c === '"' || c === "'") { quote = c; continue; }
+    if (c === "[" || c === "(") { stack.push(c); continue; }
+    if (c === "]" || c === ")") { stack.pop(); continue; }
+    if (stack.length || c !== ":" || !/\s/.test(text[i + 1] || "")) continue;
+    const prefix = text.slice(0, i).trim(), rest = text.slice(i + 1).trimStart();
+    const first = rest.match(/^(\S+)/)?.[1] || "";
+    const action = ALIASES[first] || first.replace(/^(wait|sleep)\d[\s\S]*$/, "$1");
+    if (prefix && (ACTIONS.includes(action) || actions.some((item) => distance(first, item) <= 2))) split = { prefix, rest };
+  }
+  if (split) { name = split.prefix; text = split.rest; }
   const steps = splitOutside(text).map((raw, i) => {
     const m = raw.match(/^(\S+)(?:\s+([\s\S]*))?$/);
     let action = ALIASES[m[1]] || m[1], tail = m[2] || "";
@@ -214,14 +269,14 @@ const flags = new Set(), stepsInputs = [], positional = [], suppliedOptions = ne
 let lastFlag = null;
 for (let i = 0; i < args.length; i++) {
   // Only numeric options accept a glued value; --out123 and switches keep their old errors.
-  const gluedNumber = args[i].match(/^(--(?:hold|wait|zoom|timeout-scale|columns|frames))((?:\d|\.\d)[\s\S]*)$/);
+  const gluedNumber = args[i].match(/^(--(?:hold|wait|zoom|timeout-scale|columns|frames|match-width|scale))((?:\d|\.\d)[\s\S]*)$/);
   const a = gluedNumber ? `${gluedNumber[1]}=${gluedNumber[2]}` : args[i];
   if (a.startsWith("--")) {
     const equal = a.indexOf("="), option = equal < 0 ? a : a.slice(0, equal), key = option.slice(2);
     if (!options.includes(option) && key !== "force") {
       const glued = options.find((o) => a.startsWith(o) && /^\d/.test(a.slice(o.length)));
       const suggestion = glued ? `${glued} ${a.slice(glued.length)}` : closest(option, options);
-      const examples = { out: "shots", size: "desktop", states: "idle,done", param: "state", query: '"a=1&b=2"', zoom: "1,2", mark: '"1=.open"', steps: '"click .open"', hold: "1000", compare: "ref.png", wait: "400", stitch: "before.png", label: '"修改前"', columns: "2", frames: "8" };
+      const examples = { out: "shots", size: "desktop", states: "idle,done", param: "state", query: '"a=1&b=2"', zoom: "1,2", mark: '"1=.open"', steps: '"click .open"', hold: "1000", compare: "ref.png", wait: "400", stitch: "before.png", label: '"修改前"', columns: "2", frames: "8", "match-width": "240", scale: "80%", crop: '"0,0,800,600"' };
       const example = glued ? suggestion : `${suggestion}${examples[suggestion.slice(2)] ? " " + examples[suggestion.slice(2)] : ""}`;
       fail(`不认识的选项 ${a}；是不是想写 ${example}？\n可用选项：${options.join(" ")}`);
     }
@@ -231,17 +286,24 @@ for (let i = 0; i < args.length; i++) {
     } else {
       lastFlag = null;
       if (equal < 0 && (i + 1 >= args.length || args[i + 1].startsWith("--"))) {
-        const example = { stitch: "--stitch before.png --stitch after.png --out shots", label: '--stitch before.png --label "修改前"', columns: "--stitch before.png --columns 2", frames: "page.html --record --frames 8" }[key];
+        const example = { stitch: "--stitch before.png --stitch after.png --out shots", label: '--stitch before.png --label "修改前"', columns: "--stitch before.png --columns 2", frames: "page.html --record --frames 8", "match-width": STITCH_EXAMPLE, scale: SCALE_EXAMPLE, crop: STITCH_EXAMPLE }[key];
         fail(`${option} 需要一个值${example ? `，收到 ${a}；例如 ${example}` : ""}`);
       }
       const value = equal < 0 ? args[++i] : a.slice(equal + 1);
-      if (!value) fail(`${option} 需要一个值，收到 ${a}；例如 ${option} 值`);
+      if (!value) fail(`${option} 需要一个值，收到 ${a}；例如 ${{ "match-width": STITCH_EXAMPLE, scale: SCALE_EXAMPLE, crop: STITCH_EXAMPLE }[key] || `${option} 值`}`);
       suppliedOptions.add(key);
       if (key === "steps") stepsInputs.push(value);
       else if (key === "stitch") stitchInputs.push({ path: value });
       else if (key === "label") {
         if (!stitchInputs.length || stitchInputs.at(-1).label !== undefined) fail(`--label 要跟在一张 --stitch 图片后，收到 ${a} ${value}；例如 --stitch before.png --label "修改前" --stitch after.png --label "修改后"`);
         stitchInputs.at(-1).label = value;
+      } else if (key === "match-width" || key === "scale") {
+        const image = stitchInputs.at(-1), field = key === "match-width" ? "matchWidth" : "scale";
+        if (!image || image[field] !== undefined) fail(`--${key} 要跟在一张 --stitch 图片后且每张只写一次，收到 ${a} ${value}；例如 ${key === "scale" ? SCALE_EXAMPLE : STITCH_EXAMPLE}`);
+        image[field] = stitchNumber(value, key);
+      } else if (key === "crop") {
+        if (opt.crop !== undefined) fail(`--crop 是所有图片共用的区域，只写一次，收到 ${value}；例如 ${STITCH_EXAMPLE}`);
+        opt.crop = stitchCrop(value);
       } else opt[key] = value;
     }
   } else {
@@ -292,24 +354,29 @@ const targetStem = (candidate) => {
   return String(source).replace(/[<>:"/\\|?*\x00-\x1f]/g, "-").replace(/^[. ]+|[. ]+$/g, "") || "page";
 };
 const stitching = stitchInputs.length > 0;
+if (opt.crop !== undefined && !stitching) fail(`--crop 需要 --stitch 图片，收到 ${args.join(" ")}；例如 ${STITCH_EXAMPLE}`);
 if (!target && !stitching) {
   if (opt.frames !== undefined || opt.columns !== undefined) fail(`缺少页面或拼图输入，收到 ${args.join(" ")}；例如 page.html --record --frames 8 --columns 4，或 --stitch before.png --stitch after.png --columns 2`);
   fail("缺少页面地址或文件。");
 }
 if (stitching) {
-  const incompatible = [...suppliedOptions].filter((key) => !["stitch", "label", "columns", "out", "timeout-scale"].includes(key));
+  const incompatible = [...suppliedOptions].filter((key) => !["stitch", "label", "columns", "out", "timeout-scale", "match-width", "scale", "crop"].includes(key));
   if (target || incompatible.length || [...flags].some((key) => key !== "dry-run" && key !== "force")) fail(`拼图不需要页面或截图/录屏选项，收到 ${target || incompatible.map((key) => "--" + key).join("、") || [...flags].join("、")}；例如 --stitch before.png --label "修改前" --stitch after.png --label "修改后" --columns 2 --out shots`);
   for (const [i, image] of stitchInputs.entries()) {
     try { if (!statSync(image.path).isFile()) throw new Error("不是文件"); }
     catch { fail(`拼图第 ${i + 1} 张图片不存在或不是文件，收到 ${image.path}；例如 --stitch before.png --label "修改前" --out shots`); }
   }
+  if (stitchInputs.some((image) => image.matchWidth !== undefined)) {
+    if (stitchInputs.some((image) => image.scale !== undefined)) fail(`--match-width 与 --scale 不能混用，收到两种比例声明；例如 ${STITCH_EXAMPLE}；或 ${SCALE_EXAMPLE}`);
+    if (stitchInputs.some((image) => image.matchWidth === undefined)) fail(`使用 --match-width 时每张图都要声明共有元素宽，收到未声明的图片；例如 ${STITCH_EXAMPLE}`);
+  }
 }
 if (opt.frames !== undefined && (!/^\d+$/.test(opt.frames) || !Number.isSafeInteger(+opt.frames) || +opt.frames < 2 || +opt.frames > 120)) fail(`--frames 需要 2–120 的整数，收到 ${opt.frames}；例如 page.html --record --frames 8`);
-if (opt.frames !== undefined && !flags.has("record") && !flags.has("evidence")) fail(`--frames 需要配合录屏，收到 --frames ${opt.frames}；例如 page.html --record --frames 8`);
+const captureMotion = flags.has("record") || opt.frames !== undefined;
 if (opt.columns !== undefined && (!/^\d+$/.test(opt.columns) || !Number.isSafeInteger(+opt.columns) || +opt.columns < 1)) fail(`--columns 需要正整数，收到 ${opt.columns}；例如 --stitch before.png --stitch after.png --columns 2`);
 if (opt.columns !== undefined && !stitching && opt.frames === undefined) fail(`--columns 需要配合 --stitch 或 --frames，收到 --columns ${opt.columns}；例如 page.html --record --frames 8 --columns 4`);
 if (flags.has("thumb")) {
-  const badThumb = [...["full", "mask", "record", "motion", "entry", "evidence"].filter((k) => flags.has(k)).map((k) => "--" + k), ...(opt.mark ? ["--mark"] : []), ...(opt.compare ? ["--compare"] : [])];
+  const badThumb = [...["full", "mask", "record", "motion", "entry", "evidence"].filter((k) => flags.has(k)).map((k) => "--" + k), ...(opt.frames !== undefined ? ["--frames"] : []), ...(opt.mark ? ["--mark"] : []), ...(opt.compare ? ["--compare"] : [])];
   if (badThumb.length) fail(`--thumb 只用于快速缩略图，不和 ${badThumb.join("、")} 一起用，收到 ${badThumb.join("、")}；例如 page.html --size desktop --thumb --out shots`);
   if (!suppliedOptions.has("wait")) opt.wait = "150";
 }
@@ -324,7 +391,7 @@ function deduplicate(values, key, label) {
 }
 let groups, sizes, zooms, marks, selector = null;
 if (opt.selector) {
-  const conflicts = ["full", "record", "motion", "entry", "evidence"].filter((key) => flags.has(key));
+  const conflicts = [...["full", "record", "motion", "entry", "evidence"].filter((key) => flags.has(key)), ...(opt.frames !== undefined ? ["frames"] : [])];
   if (conflicts.length) fail(`--selector 不与 ${conflicts.map((key) => "--" + key).join("、")} 同用`);
 }
 try {
@@ -332,7 +399,23 @@ try {
   groups = stepsInputs.map(parseSteps);
   const names = groups.map((g, i) => g.name || (groups.length > 1 ? String(i + 1) : ""));
   if (new Set(names).size !== names.length) throw new Error(`动作组名字重复，收到 ${names.join("、")}；例如 --steps "open: click .open" --steps "send: click .send"`);
-  groups.forEach((g, i) => g.id = names[i]);
+  const usedGroupFiles = new Set();
+  const safeGroupFile = (value) => {
+    let stem = String(value).trim().replace(/[<>:"/\\|?*\x00-\x1f\x7f]/g, "-").replace(/\s+/g, "-")
+      .replace(/^[. ]+|[. ]+$/g, "").replace(/[. ]+$/g, "");
+    let bytes = 0;
+    stem = Array.from(stem).filter((character) => {
+      bytes += Buffer.byteLength(character);
+      return bytes <= 120;
+    }).join("");
+    if (!stem) stem = "group";
+    if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$/i.test(stem)) stem = `_${stem}`;
+    const base = stem; let n = 2;
+    while (usedGroupFiles.has(stem.toLowerCase())) stem = `${base}-${n++}`;
+    usedGroupFiles.add(stem.toLowerCase());
+    return stem;
+  };
+  groups.forEach((g, i) => { g.reportName = names[i]; g.id = names[i] ? safeGroupFile(names[i]) : ""; });
   sizes = opt.size.split(",").map((s) => {
     const value = ({ desktop: "1440x900", phone: "390x844", mobile: "390x844" })[s.trim()] || s.trim();
     const m = value.match(/^(\d+)x(\d+)$/);
@@ -363,7 +446,7 @@ const stateIds = states.map((s, i) => !s ? "page" : /^[A-Za-z0-9_-]{1,80}$/.test
 const refImage = opt.compare ? resolve(opt.compare) : null;
 if (refImage && !existsSync(refImage)) fail(`找不到参考图：${opt.compare}`);
 if (refImage && !/\.(png|jpe?g|webp)$/i.test(refImage)) fail("--compare 只接受 png、jpg 或 webp");
-if (refImage && (flags.has("record") || flags.has("evidence"))) fail("--compare 用在截图上，不和 --record 或 --evidence 一起用；例如 --compare ref.png");
+if (refImage && (captureMotion || flags.has("evidence"))) fail("--compare 用在截图上，不和 --record、--frames 或 --evidence 一起用；例如 --compare ref.png");
 if (flags.has("dry-run")) {
   console.log(JSON.stringify({ target, ...(targets.length > 1 ? { targets: targets.map((t) => t.target) } : {}), selector, options: opt, flags: [...flags], sizes, zooms, states, groups, marks, notices, ...(stitching ? { stitch: stitchInputs } : {}) }, null, 2));
   process.exit(0);
@@ -408,8 +491,8 @@ const MIME = {
   ".csv": "text/csv; charset=utf-8", ".ico": "image/x-icon", ".mov": "video/quicktime", ".m4a": "audio/mp4",
   ".hdr": "application/octet-stream", ".exr": "image/x-exr", ".ktx2": "image/ktx2",
 };
-const privatePath = (path) => path.split(/[\\/]/).some((part) => part.startsWith(".")
-  || /^(?:credentials?|secrets?|id_(?:rsa|dsa|ecdsa|ed25519))(?:[._-]|$)/i.test(part));
+const privatePath = (path) => path.split(/[\\/]/).some((part) => part !== ".oil-ui" && (part.startsWith(".")
+  || /^(?:credentials?|secrets?|id_(?:rsa|dsa|ecdsa|ed25519))(?:[._-]|$)/i.test(part)));
 let server = null;
 const localFiles = targets.filter((t) => !/^https?:\/\//i.test(t.target)).map(({ target }) => {
   const path = localPath(target);
@@ -426,6 +509,17 @@ for (const file of localFiles) {
     sharedRoot = parent;
   }
 }
+let explicitRoot = null;
+if (opt.root) {
+  const candidate = resolve(opt.root);
+  if (!existsSync(candidate) || !statSync(candidate).isDirectory()) fail(`--root 需要已有目录：${opt.root}`);
+  explicitRoot = realpathSync(candidate);
+  if (explicitRoot === parse(explicitRoot).root || explicitRoot === realpathSync(tmpdir())) fail(`--root 范围过宽，请使用项目目录：${opt.root}`);
+  for (const file of localFiles) {
+    const fromRoot = relative(explicitRoot, file);
+    if (fromRoot === ".." || fromRoot.startsWith(`..${sep}`) || isAbsolute(fromRoot)) fail(`本地目标不在 --root 内：${file}`);
+  }
+}
 async function resolveTarget(t) {
   if (/^https?:\/\//i.test(t)) return t;
   let localTarget = t;
@@ -436,12 +530,12 @@ async function resolveTarget(t) {
   if (!existsSync(file)) fail(`找不到文件：${t}`);
   const isDir = statSync(file).isDirectory();
   const fileDir = realpathSync(isDir ? file : dirname(file));
-  let root = sharedRoot || fileDir;
+  let root = explicitRoot || sharedRoot || fileDir;
   try {
     const cwdReal = realpathSync(process.cwd());
     const tmpReal = realpathSync(tmpdir());
     const relDir = relative(cwdReal, root);
-    if (relDir && relDir !== ".." && !relDir.startsWith(`..${sep}`) && !isAbsolute(relDir)
+    if (!explicitRoot && relDir && relDir !== ".." && !relDir.startsWith(`..${sep}`) && !isAbsolute(relDir)
       && relDir.split(sep).length <= 3 && cwdReal !== parse(cwdReal).root && cwdReal !== tmpReal && !fileDir.startsWith(tmpReal + sep)) {
       root = cwdReal;
     }
@@ -477,113 +571,20 @@ async function resolveTarget(t) {
 }
 
 // ---------- 启动一个独立的临时浏览器，不碰用户自己的浏览器数据 ----------
-function findChrome() {
-  const env = process.env.CHROME_PATH;
-  if (env && existsSync(env)) return env;
-  const candidates = {
-    darwin: [
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-      "/Applications/Chromium.app/Contents/MacOS/Chromium",
-      "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-    ],
-    win32: [
-      `${process.env["PROGRAMFILES"]}\\Google\\Chrome\\Application\\chrome.exe`,
-      `${process.env["PROGRAMFILES(X86)"]}\\Google\\Chrome\\Application\\chrome.exe`,
-      `${process.env["LOCALAPPDATA"]}\\Google\\Chrome\\Application\\chrome.exe`,
-      `${process.env["PROGRAMFILES(X86)"]}\\Microsoft\\Edge\\Application\\msedge.exe`,
-      `${process.env["PROGRAMFILES"]}\\Microsoft\\Edge\\Application\\msedge.exe`,
-    ],
-  }[process.platform];
-  for (const c of candidates || []) if (c && existsSync(c)) return c;
-  for (const name of ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "microsoft-edge"]) {
-    const r = spawnSync("which", [name], { encoding: "utf8" });
-    if (r.status === 0 && r.stdout.trim()) return r.stdout.trim();
-  }
-  fail("没找到 Chrome、Chromium 或 Edge；安装其一，或用环境变量 CHROME_PATH 指定路径。");
-}
-
-const chromePath = findChrome();
-let profile, chrome, cleaning, ws, handedOff;
-// 启动的那个进程不一定是真正的浏览器：有的版本把浏览器交给另一个进程后自己退出。
-// 所以关闭时先让浏览器自己退出，再按本次临时目录的名字找还活着的进程。
-function closeBrowser() {
-  return new Promise((ok) => {
-    const socket = ws, timer = setTimeout(() => ok(false), 3000);
-    socket.onerror = null; socket.onclose = () => { clearTimeout(timer); ok(true); };
-    try { socket.send(JSON.stringify({ id: 2147483647, method: "Browser.close" })); } catch { clearTimeout(timer); ok(false); }
-  });
-}
-function profileProcesses() {
-  const name = basename(profile);
-  if (process.platform === "win32") {
-    const script = `Get-CimInstance Win32_Process | Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -and $_.CommandLine.Contains('${name}') } | ForEach-Object { $_.ProcessId }`;
-    const r = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { encoding: "utf8", timeout: 20000, windowsHide: true });
-    return (r.stdout || "").split(/\s+/).map(Number).filter((pid) => pid && pid !== process.pid);
-  }
-  const r = spawnSync("ps", ["-axww", "-o", "pid=,command="], { encoding: "utf8", timeout: 10000 });
-  return (r.stdout || "").split("\n").filter((line) => line.includes(name)).map((line) => Number(line.trim().split(/\s+/)[0])).filter((pid) => pid && pid !== process.pid);
-}
-function killProfileProcesses() {
-  // 查两遍：第一遍之后才冒出来的子进程也要关掉。
-  for (let pass = 0; pass < 2; pass++) {
-    const pids = profileProcesses(); if (!pids.length) return;
-    for (const pid of pids) { try { process.kill(pid, "SIGKILL"); } catch {} }
-  }
-}
-function removeProfile(closed) {
-  if (!profile) return;
-  const remove = (maxRetries) => rmSync(profile, { recursive: true, force: true, maxRetries, retryDelay: 100 });
-  try {
-    // 浏览器不是启动的那个进程时，连接断开不等于它已经退出，等不到它的退出事件，直接按目录名收尾。
-    if (!closed || handedOff) killProfileProcesses();
-    try { remove(5); } catch { killProfileProcesses(); remove(10); }
-  } catch (error) { console.error(`shoot：临时目录没删掉（${error.code || error.message}），可以稍后手动删除：${profile}`); }
-  profile = undefined;
-}
-async function stopChrome() {
-  const closed = ws?.readyState === WebSocket.OPEN ? await closeBrowser() : false;
-  if (chrome && chrome.exitCode === null && chrome.signalCode === null) await new Promise((ok) => {
-    const timer = setTimeout(() => { chrome.kill("SIGKILL"); ok(); }, 3000);
-    chrome.once("close", () => { clearTimeout(timer); ok(); }); chrome.kill();
-  });
-  removeProfile(closed);
-}
+let ws, cleaning;
+let browser;
+try { browser = createChrome({ timeoutMs, prefix: "oil-shoot-", label: "shoot" }); }
+catch (error) { fail(error.message); }
+const launchChrome = () => browser.launch();
+const stopChrome = () => browser.stop(ws);
 function cleanup() { return cleaning ||= (async () => { for (const child of encoders) child.kill("SIGKILL"); await stopChrome(); server?.close(); removeFrames(); })(); }
 process.on("exit", () => {
   try { for (const child of encoders) child.kill("SIGKILL"); removeFrames(); } catch {}
-  try { chrome?.kill(); } catch {}
   try { server?.close(); } catch {}
-  try { removeProfile(false); } catch {}
+  browser.dispose();
 });
 process.on("SIGINT", async () => { await cleanup(); process.exit(130); });
 process.on("SIGTERM", async () => { await cleanup(); process.exit(143); });
-async function launchChrome() {
-  profile = mkdtempSync(join(tmpdir(), "oil-shoot-")); handedOff = false;
-  chrome = spawn(chromePath, ["--headless=new", "--enable-unsafe-swiftshader", "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--no-first-run",
-    "--no-default-browser-check", "--hide-scrollbars", "--mute-audio", "--disable-extensions", "about:blank"], { stdio: ["ignore", "ignore", "pipe"] });
-  const portFile = join(profile, "DevToolsActivePort");
-  const fromPortFile = () => {
-    try {
-      const [port, path] = readFileSync(portFile, "utf8").split("\n").map((line) => line.trim());
-      return /^\d+$/.test(port) && path?.startsWith("/devtools/browser/") ? `ws://127.0.0.1:${port}${path}` : null;
-    } catch { return null; }
-  };
-  return new Promise((ok, no) => {
-    let buf = "", exited;
-    const timer = setTimeout(() => finish(new Error("timeout")), timeoutMs(45000));
-    const poll = setInterval(() => { const url = fromPortFile(); if (url) finish(null, url); }, 100);
-    const onData = (d) => { buf += d; const m = buf.match(/DevTools listening on (ws:\/\/\S+)/); if (m) finish(null, m[1]); };
-    const onError = (e) => finish(e);
-    // 浏览器可能已经交给另一个进程，端口文件稍后才出现，所以不马上判失败。
-    const onExit = () => { handedOff = true; exited = setTimeout(() => finish(new Error("浏览器提前退出")), timeoutMs(10000)); };
-    function finish(error, url) {
-      clearTimeout(timer); clearTimeout(exited); clearInterval(poll);
-      chrome.stderr.off("data", onData); chrome.off("error", onError); chrome.off("exit", onExit);
-      error ? no(error) : ok(url);
-    }
-    chrome.stderr.on("data", onData); chrome.once("error", onError); chrome.once("exit", onExit);
-  });
-}
 let wsUrl;
 try { wsUrl = await launchChrome(); }
 catch (error) {
@@ -638,7 +639,9 @@ const send = (method, params = {}, targetSession) => new Promise((ok, no) => {
   const timer = setTimeout(() => {
     const error = new Error(`${context}：CDP ${method} ${limit / 1000} 秒内没有响应；${slowHint()}`);
     error.code = "TRANSPORT_TIMEOUT";
-    if (method === "Page.captureScreenshot" && workerAttempt === "1") {
+    if (method === "Page.navigate") {
+      pending.delete(id); error.code = "NAVIGATION_TIMEOUT"; no(error);
+    } else if (method === "Page.captureScreenshot" && workerAttempt === "1") {
       pending.delete(id); browserNeedsRestart = true; error.code = "SCREENSHOT_TIMEOUT"; no(error);
     } else abortTransport(error);
   }, limit);
@@ -722,9 +725,14 @@ async function open(url, wait = Number(opt.wait)) {
       timer = setTimeout(ok, timeoutMs(15000));
     });
     try {
-      let nav = await cdp("Page.navigate", { url });
-      // 被取消不等于打不开：浏览器自己的导航偶尔会打断这一次（Edge 的新配置上见过），等一下再试一次。
-      if (nav.errorText === "net::ERR_ABORTED") { await sleep(300); nav = await cdp("Page.navigate", { url }); }
+      let nav, retried = false;
+      try { nav = await cdp("Page.navigate", { url }); }
+      catch (error) {
+        if (error.code !== "NAVIGATION_TIMEOUT") throw error;
+        retried = true; await sleep(300); nav = await cdp("Page.navigate", { url });
+      }
+      // 被取消或超时都不等于打不开：浏览器自己的导航偶尔会打断这一次，只补试一次。
+      if (!retried && nav.errorText === "net::ERR_ABORTED") { await sleep(300); nav = await cdp("Page.navigate", { url }); }
       if (nav.errorText) throw new Error(`打不开 ${url}：${nav.errorText}`);
       await loaded;
       await evaluate(`document.fonts ? document.fonts.ready.then(() => true) : true`);
@@ -752,15 +760,13 @@ async function check() {
   return [...problems, ...found];
 }
 
-// ---------- 默认做法提示：模型默认审美和可读性里能机械判断的几项 ----------
-// 在页面里运行，不能引用外层变量。只报不拦：命中的改掉，或在交付说明里写出理由。
+// ---------- 可读性与渲染提示：对比度、过小字号、过紧行高、停在透明 ----------
+// 在页面里运行，不能引用外层变量。
 function lintPage() {
   const LABELS = {
-    eyebrow: "标题上方的眉标", numbered: "标题上方的编号标签", sideStripe: "彩色单侧边线",
-    gradientText: "渐变文字", nestedCards: "卡片里套卡片", emojiIcon: "表情符号当图标",
-    englishLabel: "中文界面里的英文大写标签", contrastLow: "文字对比度不达标（正文低于 4.5:1，大字低于 3:1）", grayOnColor: "有色底上的灰字",
-    smallText: "正文小于 13px", tightLeading: "多行正文行高过紧", longMeasure: "正文行太长",
-    stuck: "首屏有内容停在透明状态（出场动画没触发？）", headingSpacing: "标题离上文比离下文还近",
+    contrastLow: "文字对比度不达标（正文低于 3:1，大字低于 2.5:1）",
+    smallText: "正文小于 11px", tightLeading: "多行正文行高过紧",
+    stuck: "首屏有内容停在透明状态（出场动画没触发？）",
   };
   const found = new Map();
   const describe = (el) => {
@@ -801,7 +807,6 @@ function lintPage() {
     return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
   };
   const ratio = (a, b) => { const x = luminance(a), y = luminance(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
-  const chroma = ({ r, g, b }) => (Math.max(r, g, b) - Math.min(r, g, b)) / 255;
   const over = (top, bottom) => ({
     r: top.r * top.a + bottom.r * (1 - top.a), g: top.g * top.a + bottom.g * (1 - top.a),
     b: top.b * top.a + bottom.b * (1 - top.a), a: 1,
@@ -827,156 +832,6 @@ function lintPage() {
   const all = [...document.body.querySelectorAll("*")].slice(0, 8000)
     .filter((el) => !el.closest("svg,script,style,noscript,template,head,[aria-hidden='true'],#oil-mark"));
   const texts = all.filter((el) => ownText(el).length >= 2 && shown(el));
-  const cjkCount = (document.body.innerText.match(/[一-鿿]/g) || []).length;
-  const latinCount = (document.body.innerText.match(/[A-Za-z]/g) || []).length;
-  const chinese = cjkCount > 120 && cjkCount > latinCount / 2;
-
-  // 眉标与编号标签：紧贴在标题正上方、比标题小很多的一行短字
-  const flaggedAbove = new Set();
-  const headings = [...document.querySelectorAll("h1,h2,h3")].filter(shown);
-  for (const h of headings) {
-    const hs = parseFloat(css(h).fontSize);
-    if (hs < 20) continue;
-    let prev = h.previousElementSibling, node = h;
-    while (!prev && node.parentElement && node.parentElement !== document.body) { node = node.parentElement; prev = node.previousElementSibling; }
-    if (!prev || !shown(prev) || prev.closest("nav,[aria-label*='readcrumb' i],[class*='breadcrumb' i]")) continue;
-    if (prev.querySelector("a,button,input,select,textarea,img,video,canvas") || /^(A|BUTTON|INPUT|IMG)$/.test(prev.tagName)) continue;
-    const text = (prev.innerText || "").trim();
-    if (!text || text.length > 48 || text.includes("\n")) continue;
-    let holder = prev;
-    while (!ownText(holder) && holder.children.length === 1) holder = holder.children[0];
-    const s = css(holder), size = parseFloat(s.fontSize);
-    if (size > 16 || size > hs * 0.6) continue;
-    const pr = prev.getBoundingClientRect(), hr = h.getBoundingClientRect();
-    if (pr.bottom > hr.top + 4 || hr.top - pr.bottom > Math.max(32, hs * 1.2) || pr.right < hr.left || pr.left > hr.right) continue;
-    const caps = s.textTransform === "uppercase" || (/[A-Z]{3}/.test(text) && text === text.toUpperCase());
-    const tracked = parseFloat(s.letterSpacing) / size >= 0.05;
-    const mono = /mono|courier|consolas|menlo/i.test(s.fontFamily);
-    const ps = css(prev);
-    const pill = parseFloat(ps.borderTopLeftRadius) >= pr.height / 3 && (rgba(ps.backgroundColor).a > 0.1 || parseFloat(ps.borderTopWidth) >= 1);
-    const numbered = /^0\d$/.test(text) || /^(?:0?\d{1,2}|[IVX]{1,4})(?:\s*[\/·—–|]\s*|[.:]\s+)\S/.test(text);
-    if (numbered) { add("numbered", prev); flaggedAbove.add(h); }
-    else if (caps || tracked || mono || pill) { add("eyebrow", prev); flaggedAbove.add(h); }
-  }
-
-  // 标题离下文应比离上文近：标题属于它后面的内容
-  for (const h of headings) {
-    if (flaggedAbove.has(h)) continue;
-    const parent = css(h.parentElement);
-    if (parent.display.includes("grid") || (parent.display.includes("flex") && !parent.flexDirection.startsWith("column"))) continue;
-    let prev = h.previousElementSibling, next = h.nextElementSibling;
-    while (prev && !shown(prev)) prev = prev.previousElementSibling;
-    while (next && !shown(next)) next = next.nextElementSibling;
-    if (!prev || !next) continue;
-    const hr = h.getBoundingClientRect();
-    const above = hr.top - prev.getBoundingClientRect().bottom, below = next.getBoundingClientRect().top - hr.bottom;
-    if (above >= 0 && below >= 12 && above + 4 < below) add("headingSpacing", h, "上 " + Math.round(above) + "px，下 " + Math.round(below) + "px");
-  }
-
-  const hasCurrentSemantics = (n) => {
-    if (!n) return false;
-    const ariaCurrent = typeof n.getAttribute === "function" ? n.getAttribute("aria-current") : null;
-    if (ariaCurrent && ariaCurrent !== "false") return true;
-    const ariaSelected = typeof n.getAttribute === "function" ? n.getAttribute("aria-selected") : null;
-    if (ariaSelected === "true") return true;
-    if (typeof n.matches === "function" && n.matches("[aria-current]:not([aria-current='false']),[aria-selected='true']")) return true;
-    const cls = typeof n.className === "string" ? n.className : "";
-    return /\b(is-)?(active|current|selected)\b/i.test(cls);
-  };
-  const isNavCurrent = (node) => {
-    if (!node.closest("nav,[role='navigation'],[role='tablist']")) return false;
-    if (hasCurrentSemantics(node)) return true;
-    if (node.tagName === "LI" && typeof node.querySelector === "function") {
-      return hasCurrentSemantics(node.querySelector("a,button,[role='tab'],[role='menuitem']"));
-    }
-    return false;
-  };
-
-  for (const el of all) {
-    const s = css(el);
-    if (s.display === "none") continue;
-    const r = el.getBoundingClientRect();
-    if (!r.width || !r.height) continue;
-
-    // 单侧彩色边线：边框或贴边的伪元素，中性色的结构分隔线、blockquote 引文、导航当前选中指示不算
-    const isQuoteOrNav = el.matches("blockquote") || isNavCurrent(el);
-    if (!isQuoteOrNav) {
-      const sides = { left: parseFloat(s.borderLeftWidth), right: parseFloat(s.borderRightWidth), top: parseFloat(s.borderTopWidth), bottom: parseFloat(s.borderBottomWidth) };
-      for (const side of ["left", "right"]) {
-        const w = sides[side], others = Math.max(sides[side === "left" ? "right" : "left"], sides.top, sides.bottom);
-        const c = rgba(s[side === "left" ? "borderLeftColor" : "borderRightColor"]);
-        if (w >= 2 && w >= others * 2 && /solid|double/.test(s[side === "left" ? "borderLeftStyle" : "borderRightStyle"])
-          && c.a >= 0.4 && chroma(c) >= 0.15 && r.height >= 16 && r.width > sides.left + sides.right + 24 && r.height < innerHeight * 0.8) add("sideStripe", el, w + "px");
-      }
-      for (const pseudo of ["::before", "::after"]) {
-        const p = css(el, pseudo);
-        if (p.content === "none" || p.position !== "absolute") continue;
-        const pw = parseFloat(p.width), ph = parseFloat(p.height), c = rgba(p.backgroundColor);
-        if (pw >= 2 && pw <= 8 && ph >= r.height * 0.6 && r.height >= 24 && r.width > 60 && c.a >= 0.4 && chroma(c) >= 0.15
-          && (parseFloat(p.left) <= 2 || parseFloat(p.right) <= 2)) add("sideStripe", el, pseudo);
-      }
-    }
-
-    if (/text/.test(s.backgroundClip + " " + s.getPropertyValue("-webkit-background-clip")) && /gradient/.test(s.backgroundImage) && (el.textContent || "").trim()) add("gradientText", el);
-  }
-
-  // 卡片里套卡片：有边框或阴影的圆角块，放在另一个圆角块里
-  const boundary = (el) => {
-    if (el.matches('[role="listbox"],[role="menu"],[role="dialog"],[role="tooltip"],[popover]')) return true;
-    const position = css(el).position;
-    if (position === "fixed") return true;
-    if (position !== "absolute" || !el.parentElement) return false;
-    const r = el.getBoundingClientRect(), parent = el.parentElement.getBoundingClientRect();
-    // A positioned card inside a panel is still a card; a popup crosses its DOM parent's boundary.
-    return r.left < parent.left - 1 || r.top < parent.top - 1 || r.right > parent.right + 1 || r.bottom > parent.bottom + 1;
-  };
-  const content = (el) => (el.textContent || "").trim() || el.querySelector("img,svg,canvas,video,input,select,textarea,button,a,[contenteditable]");
-  const card = (el, inner) => {
-    const s = css(el), r = el.getBoundingClientRect();
-    if (boundary(el) || !content(el)) return false;
-    if (r.width < 120 || r.height < 56 || /^(BUTTON|A|INPUT|SELECT|TEXTAREA|IMG|VIDEO|CANVAS|LABEL|SUMMARY|PRE|CODE)$/.test(el.tagName)) return false;
-    if (parseFloat(s.borderTopLeftRadius) < 6) return false;
-    const border = ["Top", "Right", "Bottom", "Left"].every((k) => parseFloat(s["border" + k + "Width"]) >= 1 && rgba(s["border" + k + "Color"]).a > 0.05);
-    const shadow = s.boxShadow !== "none";
-    const fill = rgba(s.backgroundColor).a > 0.05;
-    if (inner) return border || (shadow && fill);
-    return (border || shadow || fill) && r.width * r.height < innerWidth * innerHeight * 0.6;
-  };
-  const rCompact = (el) => el.getBoundingClientRect().height <= 100;
-  for (const el of all) {
-    if (!card(el, true)) continue;
-    for (let up = el.parentElement, depth = 0; up && up !== document.body && depth < 8; up = up.parentElement, depth++) {
-      if (boundary(up)) break;
-      // A compact attachment with its own removal/retry control is editor content, not another panel.
-      const editor = up.matches("form,[role='textbox']") || up.querySelector("textarea,[contenteditable='true'],[contenteditable='']");
-      if (editor && rCompact(el) && el.querySelector("button,a,[role='button']") && !el.querySelector("h1,h2,h3,h4,section,article,textarea,[contenteditable]")) break;
-      if (card(up, false)) { add("nestedCards", el, "外层 " + describe(up).split("「")[0]); break; }
-    }
-  }
-
-  const emoji = /^(?:\p{Emoji_Presentation}|\p{Extended_Pictographic}️)(?:‍\p{Extended_Pictographic}️?)*$/u;
-  const reaction = (el) => {
-    const button = el.closest("button,[role='button']");
-    if (!button) return false;
-    const text = (button.textContent || "").trim();
-    const symbol = ownText(el);
-    // aria-pressed alone also describes toolbar toggles: require an emoji-only value or an adjacent count.
-    return (button.hasAttribute("aria-pressed") && text === symbol) ||
-      (text.startsWith(symbol) && /^\s*\d+(?:[.,]\d+)?\s*$/.test(text.slice(symbol.length)));
-  };
-  const emojiHits = texts.filter((el) => emoji.test(ownText(el)) && !el.closest("p,blockquote,li > p,[role='listbox'],[role='menu'],[popover]") && !reaction(el));
-  if (emojiHits.length >= 2) emojiHits.forEach((el) => add("emojiIcon", el));
-
-  if (chinese) {
-    const labels = texts.filter((el) => {
-      const t = (el.innerText || "").trim();
-      if (!t || t.length > 40 || /[一-鿿]/.test(t) || el.closest("code,pre,kbd,samp")) return false;
-      const letters = (t.match(/[A-Za-z]/g) || []).length;
-      const upper = css(el).textTransform === "uppercase" || (/[A-Z]{2}/.test(t) && t === t.toUpperCase());
-      return upper && (letters >= 8 || /[A-Za-z]{2,}\s+[A-Za-z]{2,}/.test(t));
-    });
-    if (labels.length >= 2) labels.forEach((el) => add("englishLabel", el));
-  }
 
   const isAncestor = (anc, node) => {
     for (let p = node; p; p = p.parentElement) if (p === anc) return true;
@@ -1026,8 +881,7 @@ function lintPage() {
       const large = size >= 24 || (size >= 18.6 && parseInt(s.fontWeight, 10) >= 700);
       // 低于 1.5:1 且背后垫着非祖先底板或伪元素（滑块、绝对定位胶囊）时，不误报对比度；确定底色上的极低对比度照常报错
       if (!(contrast < 1.5 && hasOverlayPlate(el, r))) {
-        if (contrast < (large ? 3 : 4.5)) add("contrastLow", el, contrast.toFixed(2) + ":1");
-        else if (chroma(bg) >= 0.25 && chroma(color) < 0.06 && luminance(color) > 0.08 && luminance(color) < 0.6) add("grayOnColor", el);
+        if (contrast < (large ? 2.5 : 3.0)) add("contrastLow", el, contrast.toFixed(2) + ":1");
       }
     }
     // 正文：两行以上的段落
@@ -1036,10 +890,8 @@ function lintPage() {
     if (text.length < (zh ? 30 : 60) || el.closest("code,pre,table,nav,button,label,figcaption,kbd")) continue;
     const lh = s.lineHeight === "normal" ? size * 1.2 : parseFloat(s.lineHeight);
     if (r.height < lh * 1.8) continue;
-    if (size < 12.5) add("smallText", el, size + "px");
+    if (size < 11) add("smallText", el, size + "px");
     if (lh / size < (zh ? 1.4 : 1.3)) add("tightLeading", el, (lh / size).toFixed(2));
-    const perLine = zh ? r.width / size : r.width / (size * 0.5);
-    if (perLine > (zh ? 46 : 95)) add("longMeasure", el, "每行约 " + Math.round(perLine) + (zh ? " 字" : " 个字符"));
   }
 
   // 首屏里停在透明的内容：出场动画没触发时截图会缺一块
@@ -1067,7 +919,7 @@ async function lint() {
   try {
     return await evaluate(`(${lintPage.toString()})()`);
   } catch (error) {
-    return [{ rule: "lintError", label: "默认做法检查没跑完", count: 1, examples: [error.message.slice(0, 160)] }];
+    return [{ rule: "lintError", label: "可读性检查没跑完", count: 1, examples: [error.message.slice(0, 160)] }];
   }
 }
 const lintLine = (items) => items.map((i) => `${i.label} ${i.count} 处（${i.examples.join("，")}）`).join("；");
@@ -1095,7 +947,21 @@ async function selectorClip() {
     const box = await evaluate(`(async () => {
       const el = (${findSource})(${JSON.stringify(selector)})[0];
       if (!el) return null;
-      el.scrollIntoView({ block: "center", inline: "center", behavior: "instant" });
+      const r0 = el.getBoundingClientRect();
+      const hasTopBar = [...document.body.querySelectorAll("*")].slice(0, 1000).some((n) => {
+        if (n === el || n.contains(el) || el.contains(n)) return false;
+        const pos = getComputedStyle(n).position;
+        if (pos !== "fixed" && pos !== "sticky") return false;
+        const nr = n.getBoundingClientRect();
+        return nr.width > innerWidth * 0.3 && nr.height > 0 && nr.height <= 160 && nr.top <= 24 && nr.bottom > 0;
+      });
+      if (r0.height > innerHeight * 0.65 || hasTopBar) {
+        el.scrollIntoView({ block: "nearest", inline: "center", behavior: "instant" });
+        const r1 = el.getBoundingClientRect();
+        window.scrollTo({ top: Math.max(0, r1.top + scrollY - 72), left: scrollX, behavior: "instant" });
+      } else {
+        el.scrollIntoView({ block: "center", inline: "center", behavior: "instant" });
+      }
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
       const r = el.getBoundingClientRect();
       return { x: r.left + scrollX, y: r.top + scrollY, width: r.width, height: r.height };
@@ -1464,7 +1330,7 @@ async function runSteps(steps = [], observer = {}) {
 }
 
 // ---------- 本地拼图和录屏序列：共享同一份等比例排版 ----------
-async function composeImages(items, file, columns) {
+async function composeImages(items, file, columns, crop = null) {
   const example = stitching ? '--stitch before.png --stitch after.png --columns 2 --out shots' : 'page.html --record --frames 8 --columns 4 --out shots';
   const types = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".gif": "image/gif", ".avif": "image/avif", ".bmp": "image/bmp", ".svg": "image/svg+xml" };
   const inputs = items.map((item, i) => {
@@ -1473,14 +1339,28 @@ async function composeImages(items, file, columns) {
   });
   // Render off the recorded page so its scripts, styles and fonts cannot alter the composition.
   await open("data:text/html,<meta charset=utf-8><meta http-equiv=Content-Security-Policy content=\"default-src 'none'; img-src data:; style-src 'unsafe-inline'\">", 0);
-  const result = await evaluate(`(async (items, columns) => {
+  const result = await evaluate(`(async (items, columns, crop) => {
     const images = await Promise.all(items.map((item, i) => new Promise((ok, no) => {
       const image = new Image(); image.onload = () => ok(image);
       image.onerror = () => no(new Error('拼图第 ' + (i + 1) + ' 张图片无法解码，收到 ' + item.path + '；例如 --stitch before.png --label "修改前" --out shots'));
       image.src = item.data;
     })));
     const margin = 24, gap = 16, lineHeight = 24;
-    const cell = Math.min(640, Math.max(items.some((item) => item.label) ? 160 : 1, ...images.map((image) => image.naturalWidth)));
+    const normalized = !!crop || items.some((item) => item.matchWidth !== undefined || item.scale !== undefined);
+    const regions = images.map((image, i) => {
+      const scale = items[i].matchWidth !== undefined ? items[0].matchWidth / items[i].matchWidth : (items[i].scale ?? 1);
+      const width = image.naturalWidth * scale, height = image.naturalHeight * scale;
+      if (![scale, width, height].every((n) => Number.isFinite(n) && n > 0)) throw new Error('拼图第 ' + (i + 1) + ' 张图片的比例过大或过小，收到 ' + scale + '；例如 ' + ${JSON.stringify(SCALE_EXAMPLE)});
+      if (items[i].matchWidth > image.naturalWidth) throw new Error('拼图第 ' + (i + 1) + ' 张共有元素宽超出原图宽，收到 ' + items[i].matchWidth + '，原图宽 ' + image.naturalWidth + '；例如 ' + ${JSON.stringify(STITCH_EXAMPLE)});
+      if (crop && (crop.x + crop.width > width + 1e-7 || crop.y + crop.height > height + 1e-7)) throw new Error('拼图第 ' + (i + 1) + ' 张裁切超出图片，收到 ' + JSON.stringify(crop) + '，统一比例后为 ' + width + '×' + height + '；缩小裁切范围或先去掉 --crop 查看整图，例如 ' + ${JSON.stringify(SCALE_EXAMPLE)});
+      const region = crop || { x: 0, y: 0, width, height };
+      return { scale, width: region.width, height: region.height,
+        sourceCrop: { x: region.x / scale, y: region.y / scale, width: region.width / scale, height: region.height / scale } };
+    });
+    const widest = Math.max(...regions.map((region) => region.width));
+    const cell = Math.ceil(Math.min(640, Math.max(items.some((item) => item.label) ? 160 : 1, widest)));
+    // A single preview factor preserves the declared relationship, even for different image widths.
+    const commonFit = Math.min(1, cell / widest);
     columns = Math.min(columns, images.length);
     const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
     const font = '18px "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif';
@@ -1497,9 +1377,11 @@ async function composeImages(items, file, columns) {
       });
     });
     const dimensions = images.map((image, i) => {
-      const scale = Math.min(1, cell / image.naturalWidth);
+      const region = regions[i], fit = normalized ? commonFit : Math.min(1, cell / region.width);
       return { naturalWidth: image.naturalWidth, naturalHeight: image.naturalHeight,
-        width: Math.max(1, Math.round(image.naturalWidth * scale)), height: Math.max(1, Math.round(image.naturalHeight * scale)),
+        scale: region.scale, renderScale: region.scale * fit, sourceCrop: region.sourceCrop,
+        ...(items[i].matchWidth !== undefined ? { matchWidth: items[i].matchWidth } : {}),
+        width: Math.max(1, Math.round(region.width * fit)), height: Math.max(1, Math.round(region.height * fit)),
         labelHeight: labels[i].length ? 8 + labels[i].length * lineHeight : 0 };
     });
     const heights = [];
@@ -1514,15 +1396,16 @@ async function composeImages(items, file, columns) {
       const row = Math.floor(i / columns), column = i % columns;
       if (i && !column) top += heights[row - 1] + gap;
       const x = margin + column * (cell + gap) + Math.floor((cell - item.width) / 2);
-      ctx.drawImage(images[i], x, top, item.width, item.height);
+      const source = item.sourceCrop;
+      ctx.drawImage(images[i], source.x, source.y, source.width, source.height, x, top, item.width, item.height);
       ctx.fillStyle = '#333';
       labels[i].forEach((line, index) => ctx.fillText(line, margin + column * (cell + gap), top + item.height + 8 + index * lineHeight));
       return { ...item, x, y: top, label: items[i].label || '', labelY: top + item.height + 8 };
     });
     const data = canvas.toDataURL('image/png').split(',')[1];
     if (!data) throw new Error('拼图无法导出 PNG；请减少图片/帧数，例如 ' + ${JSON.stringify(example)});
-    return { data, width: canvas.width, height: canvas.height, columns, items: layout };
-  })(${JSON.stringify(inputs)}, ${columns})`);
+    return { data, width: canvas.width, height: canvas.height, columns, ...(crop ? { crop } : {}), items: layout };
+  })(${JSON.stringify(inputs)}, ${columns}, ${JSON.stringify(crop)})`);
   writeFileSync(file, Buffer.from(result.data, "base64"));
   const { data, ...layout } = result;
   return { file: basename(file), ...layout };
@@ -1537,7 +1420,7 @@ async function sheet(items, file, w, h) {
   const html = `<!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><style>body{margin:0;padding:32px;background:#ececea;font:13px -apple-system,"PingFang SC",sans-serif;color:#555}
 main{display:flex;gap:24px;align-items:flex-start}figure{margin:0;width:${cell}px}img{width:100%;display:block;border-radius:12px;box-shadow:0 1px 3px #0002}
 figcaption{margin-top:10px}</style><main>${figures}</main>`;
-  const tmp = join(profile, "sheet.html");
+  const tmp = browser.tempFile("sheet.html");
   writeFileSync(tmp, html);
   const width = items.length * cell + (items.length - 1) * 24 + 64;
   await setViewport(width, Math.round((cell * h) / w) + 120, 1);
@@ -1589,7 +1472,7 @@ canvas{width:100%;display:block;border-radius:8px;box-shadow:0 1px 3px #0002;bac
   });
   window.__compare = { overall: +(100 * total / (sw * sh)).toFixed(1), cells, refHeight: refH, buildHeight: build.naturalHeight };
 })().catch((e) => { window.__compare = { error: e.message }; });</script>`;
-  const tmp = join(profile, "compare.html");
+  const tmp = browser.tempFile("compare.html");
   writeFileSync(tmp, html);
   await setViewport(2 * 720 + 20 + 56, 900, 1);
   await open(`file://${tmp}`);
@@ -1803,6 +1686,7 @@ async function record(url, w, h, { steps = [], name = "", entry = flags.has("ent
       details.sequence = { ...sequence, frames: samples.map(({ path, ...time }) => time) };
       sequenceMessage = ` 和 ${sequence.file}`;
     }
+    if (opt.frames !== undefined && !flags.has("record")) return { issues, ...details, message: `序列图：${details.sequence.file}（${(finished - frames[0].t).toFixed(1)} 秒），未编码视频` };
     const ffmpeg = (await runFfmpeg(["-version"], 5000)).status === 0;
     if (!ffmpeg) return { issues, ...details, failed: true, message: `录屏：没装 ffmpeg，只留了 ${motion}-start/mid/end.jpg 三帧${sequenceMessage}` };
     // Generated basenames are safe for concat's quoting, even when --out contains an apostrophe.
@@ -1947,7 +1831,7 @@ async function probeMotion(url, w, h, steps = []) {
         if (!p.elements && scrollable) issues.push("滚动：没有检测到随滚动出现的变化；落地页、品牌页、发布页和展览页需要一段滚动叙事");
         continue;
       }
-      if (!p.elements) issues.push(`${names[k]}：没有检测到动画`);
+      if (!p.elements) issues.push(`${names[k]}：没有检测到动画${k === "load" && !steps.length ? "；交互动效要配 --steps 才能探测到" : ""}`);
       else if (p.loops === p.elements) issues.push(`${names[k]}：只有持续循环的动画，没有一次性的${k === "load" ? "出场" : "反馈"}`);
       else if (weak(p)) issues.push(`${names[k]}：动画幅度太小，看不出来（最大位移 ${p.maxMove}px，尺寸变化 ${(p.maxSize * 100).toFixed(1)}%，透明度变化 ${p.maxOpacity}）`);
     }
@@ -1970,7 +1854,7 @@ const withState = (s) => {
 const report = [], lines = [];
 const usedFiles = new Set();
 const targetShots = [];
-const autoSheet = targets.length > 1 && !flags.has("no-sheet") && (!flags.has("record") || flags.has("evidence"));
+const autoSheet = targets.length > 1 && !flags.has("no-sheet") && (!captureMotion || flags.has("evidence"));
 if (autoSheet) usedFiles.add("sheet.png");
 const candidatePrefix = () => batchMode ? targetStem(activeTarget) : "";
 function reserveFamily(preferred, files) {
@@ -1995,8 +1879,8 @@ function skipped(file, metadata, reason) {
   lines.push(`${file}  ⚠ 跳过：${reason}`); progress(file, "skipped");
 }
 function retryItem(file, metadata, extra = "") {
-  const group = groups.find((g) => g.id === (metadata.group || "") && !(evidence && file.endsWith(".png")));
-  const steps = group?.steps.length ? (group.id ? group.id + ": " : "") + group.steps.map((s) => s.raw).join("; ") : "";
+  const group = groups.find((g) => g.reportName === (metadata.group || "") && !(evidence && file.endsWith(".png")));
+  const steps = group?.steps.length ? (group.reportName ? group.reportName + ": " : "") + group.steps.map((s) => s.raw).join("; ") : "";
   const variant = file.endsWith("-masked.png") ? " --mask" : file.endsWith("-marked.png") ? ` --mark ${quoteArg(opt.mark)}` : file.endsWith("-compare.png") ? ` --compare ${quoteArg(refImage)}` : "";
   const isSheet = file.endsWith(".png") && metadata.state === undefined && states.length > 1;
   if (autoSheet && file === "sheet.png") return `node ${quoteArg(resolve(process.argv[1]))} ${args.map(quoteArg).join(" ")} --timeout-scale 2`;
@@ -2032,7 +1916,7 @@ async function captureBatch(selectedStates, selectedZooms, selectedGroups, useMa
       const state = states[stateIndex];
       const preferred = [candidatePrefix(), batchMode && state === null ? "" : stateIds[stateIndex], suffix].filter(Boolean).join("-");
       const name = reserveFamily(preferred, (stem) => [`${stem}.png`, ...(useMask ? [`${stem}-masked.png`] : []), ...(marks.length ? [`${stem}-marked.png`] : []), ...(refImage ? [`${stem}-compare.png`] : [])]);
-      const meta = { ...(batchMode ? { target: activeTarget.target, name: activeTarget.name || targetStem(activeTarget) } : {}), state, size: `${w}x${h}`, zoom, ...(group.id ? { group: group.id } : {}) };
+      const meta = { ...(batchMode ? { target: activeTarget.target, name: activeTarget.name || targetStem(activeTarget) } : {}), state, size: `${w}x${h}`, zoom, ...(group.reportName ? { group: group.reportName } : {}) };
       const thumb = flags.has("thumb");
       const settleBudget = thumb ? 300 : 2000;
       const prepare = async () => {
@@ -2049,7 +1933,7 @@ async function captureBatch(selectedStates, selectedZooms, selectedGroups, useMa
         await screenshot(file, flags.has("full"), selector ? await selectorClip() : thumb ? { x: 0, y: 0, width: w, height: h, scale: 0.5 } : null);
         const issues = await check(), hints = thumb ? [] : await lint();
         entry = { file: basename(file), ...meta, ...(thumb ? { thumb: true } : {}), animationWaitMs, issues, lint: hints };
-        lines.push(`${basename(file)}${issues.length ? "  ⚠ " + issues.join("；") : ""}${hints.length ? "  ◇ 默认做法提示：" + lintLine(hints) : ""}`);
+        lines.push(`${basename(file)}${issues.length ? "  ⚠ " + issues.join("；") : ""}${hints.length ? "  ◇ 可读性提示：" + lintLine(hints) : ""}`);
         report.push(entry); shots.push({ path: file, label: state || "page" });
         if (batchMode) targetShots.push({ path: file, label: [meta.name, state, suffix].filter(Boolean).join(" · ") });
       });
@@ -2081,7 +1965,7 @@ async function captureBatch(selectedStates, selectedZooms, selectedGroups, useMa
       const sheetSuffixParts = [group.id, sizes.length > 1 ? `${w}x${h}` : "", selectedZooms.length > 1 && zoom !== 1 ? `@${zoom}x` : ""].filter(Boolean);
       const preferred = `${candidatePrefix() ? candidatePrefix() + "-" : ""}sheet${sheetSuffixParts.length ? "-" + sheetSuffixParts.join("-") : ""}`;
       const sheetName = reserveFamily(preferred, (stem) => [`${stem}.png`, ...(useMask ? [`${stem}-masked.png`] : [])]);
-      const meta = { size: `${w}x${h}`, zoom, ...(group.id ? { group: group.id } : {}) };
+      const meta = { size: `${w}x${h}`, zoom, ...(group.reportName ? { group: group.reportName } : {}) };
       if (shots.length > 1) await item(`${sheetName}.png`, meta, async () => {
         lines.push(basename(await sheet(shots, join(out, `${sheetName}.png`), w, h)));
       });
@@ -2096,9 +1980,9 @@ async function captureBatch(selectedStates, selectedZooms, selectedGroups, useMa
   }
 }
 async function motionBatch() {
-  for (const group of groups.length ? groups : [{ id: "", steps: [] }]) {
+  for (const group of groups.length ? groups : [{ id: "", reportName: "", steps: [] }]) {
     const file = `${candidatePrefix() ? candidatePrefix() + "-" : ""}motion-probe${group.id ? "-" + group.id : ""}`;
-    const meta = { state: states[0], size: `${sizes[0].w}x${sizes[0].h}`, zoom: 1, ...(group.id ? { group: group.id } : {}) };
+    const meta = { state: states[0], size: `${sizes[0].w}x${sizes[0].h}`, zoom: 1, ...(group.reportName ? { group: group.reportName } : {}) };
     await item(file, meta, async () => {
       const result = await probeMotion(withState(states[0]), sizes[0].w, sizes[0].h, group.steps);
       lines.push(result.message + (result.issues.length ? "  ⚠ " + result.issues.join("；") : ""));
@@ -2110,7 +1994,8 @@ async function recording(group, entry, zoom, multipleZooms = false) {
   const preferred = [candidatePrefix(), group.id, multipleZooms && zoom !== 1 ? `@${zoom}x` : ""].filter(Boolean).join("-");
   const name = reserveFamily(preferred, (stem) => [`record${stem ? "-" + stem : ""}.mp4`, ...["start", "mid", "end"].map((frame) => `motion${stem ? "-" + stem : ""}-${frame}.jpg`), ...(opt.frames !== undefined ? [`motion${stem ? "-" + stem : ""}-sequence.png`] : [])]);
   const file = `motion${name ? "-" + name : ""}-end.jpg`;
-  const meta = { state: states[0], size: `${sizes[0].w}x${sizes[0].h}`, zoom, ...(group.id ? { group: group.id } : {}) };
+  const meta = { state: states[0], size: `${sizes[0].w}x${sizes[0].h}`, zoom,
+    ...((group.reportName || group.id) ? { group: group.reportName || group.id } : {}) };
   await item(file, meta, async () => {
     problems = [];
     const result = await record(withState(states[0]), sizes[0].w, sizes[0].h, { name, steps: group.steps, entry, zoom });
@@ -2118,19 +2003,19 @@ async function recording(group, entry, zoom, multipleZooms = false) {
     for (const warning of result.warnings || []) lines.push(`⚠ ${warning}`);
     report.push({ file, ...meta, issues: result.issues, frames: result.frames, sampling: result.sampling, durationMs: result.durationMs, ...(result.sequence ? { sequence: result.sequence } : {}), ...(result.consistency ? { consistency: result.consistency } : {}), ...(result.warnings?.length ? { warnings: result.warnings } : {}), ...(result.failed ? { failed: true } : {}) });
     if (evidence && result.failed) { report.at(-1).issues.push(result.message); process.exitCode = 1; }
-  }, ` --record${entry ? " --entry" : ""}`);
+  }, `${opt.frames !== undefined ? ` --frames ${opt.frames}` : ""}${flags.has("record") || opt.frames === undefined ? " --record" : ""}${entry ? " --entry" : ""}`);
 }
 const shotCount = (n, z, g, mask, sheet) => sizes.length * z * g * (n * (1 + Number(mask) + Number(marks.length > 0) + Number(!!refImage)) + (sheet && !flags.has("no-sheet") && n > 1 ? 1 + Number(mask) : 0));
 const batchMask = states.length > 1 || flags.has("mask");
 progressTotal = evidence
   ? (suppliedOptions.has("zoom") ? shotCount(states.length, zooms.length, 1, batchMask, states.length > 1) : shotCount(states.length, 1, 1, batchMask, states.length > 1) + shotCount(1, 1, 1, flags.has("mask"), false)) + Math.max(1, groups.length) + 1 + groups.length
-  : (flags.has("motion") ? Math.max(1, groups.length) : 0) + (flags.has("record") ? zooms.length * Math.max(1, groups.length) : shotCount(states.length, zooms.length, Math.max(1, groups.length), flags.has("mask"), flags.has("sheet")));
+  : (flags.has("motion") ? Math.max(1, groups.length) : 0) + (captureMotion ? zooms.length * Math.max(1, groups.length) : shotCount(states.length, zooms.length, Math.max(1, groups.length), flags.has("mask"), flags.has("sheet")));
 progressTotal = progressTotal * Math.max(1, targets.length) + Number(autoSheet);
 try {
   if (stitching) {
     progressTotal = 1;
     await item("stitch.png", {}, async () => {
-      const result = await composeImages(stitchInputs, join(out, "stitch.png"), Number(opt.columns || 2));
+      const result = await composeImages(stitchInputs, join(out, "stitch.png"), Number(opt.columns || 2), opt.crop);
       report.push({ ...result, issues: [] });
       lines.push(`拼图：${result.file}（${result.width}×${result.height}，${result.columns} 列）`);
     });
@@ -2138,7 +2023,7 @@ try {
     for (const [index, candidate] of targets.entries()) {
       base = bases[index]; activeTarget = candidate;
       if (evidence) {
-        const plain = [{ id: "", steps: [] }];
+        const plain = [{ id: "", reportName: "", steps: [] }];
         if (suppliedOptions.has("zoom")) {
           await captureBatch(states.map((_, i) => i), zooms, plain, states.length > 1 || flags.has("mask"), states.length > 1);
         } else {
@@ -2149,13 +2034,13 @@ try {
         // Avoid collisions with a user group named entry.
         let entryId = "entry";
         while (groups.some((g) => g.id === entryId)) entryId += "-appearance";
-        await recording({ id: entryId, steps: [] }, true, 1);
+        await recording({ id: entryId, reportName: entryId, steps: [] }, true, 1);
         for (const group of groups) await recording(group, false, 1);
       } else {
         if (flags.has("motion")) await motionBatch();
-        if (flags.has("record")) {
-          for (const zoom of zooms) for (const group of groups.length ? groups : [{ id: "", steps: [] }]) await recording(group, flags.has("entry"), zoom, zooms.length > 1);
-        } else await captureBatch(states.map((_, i) => i), zooms, groups.length ? groups : [{ id: "", steps: [] }], flags.has("mask"), flags.has("sheet"));
+        if (captureMotion) {
+          for (const zoom of zooms) for (const group of groups.length ? groups : [{ id: "", reportName: "", steps: [] }]) await recording(group, flags.has("entry"), zoom, zooms.length > 1);
+        } else await captureBatch(states.map((_, i) => i), zooms, groups.length ? groups : [{ id: "", reportName: "", steps: [] }], flags.has("mask"), flags.has("sheet"));
       }
     }
     if (autoSheet) {
@@ -2174,7 +2059,7 @@ for (const l of lines) console.log(`- ${l}`);
 const total = report.reduce((n, r) => n + r.issues.length, 0);
 if (report.length) console.log(total ? `发现 ${total} 个问题，详见 report.json` : `检查通过：没有控制台错误、横向溢出或加载失败的图片${flags.has("motion") ? "，三段动效都检测到了" : ""}`);
 const hinted = [...new Set(report.flatMap((r) => (r.lint || []).map((i) => i.label)))];
-if (hinted.length) console.log(`默认做法提示 ${hinted.length} 类：${hinted.join("、")}。可读性几项（对比度不达标、正文小于 13px、行高过紧、停在透明）要改；其余改掉，或在交付说明里写出它怎样服务方向，误报也写一句。详见 report.json 的 lint`);
+if (hinted.length) console.log(`可读性与渲染提示 ${hinted.length} 类：${hinted.join("、")}。详见 report.json 的 lint`);
 const reviewerManual = resolve(dirname(process.argv[1]), "../references/reviewer-manual.md");
 if (evidence && existsSync(reviewerManual)) console.log(`评审交接：将 ${reviewerManual} 与证据目录 ${out} 传给独立评审子 Agent`);
 finishing = true;

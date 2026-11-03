@@ -11,6 +11,7 @@
     "codex": true,
     "opencode": true,
     "qwen_code": true,
-    "workbuddy": true
+    "workbuddy": true,
+    "workbuddy_overseas": true
   }
 }
