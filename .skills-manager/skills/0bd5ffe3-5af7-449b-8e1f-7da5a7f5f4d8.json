@@ -4,7 +4,9 @@
   "path": "chief-of-staff",
   "path_key": "chief-of-staff",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "Mattpocock"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/mattpocock/skills",
