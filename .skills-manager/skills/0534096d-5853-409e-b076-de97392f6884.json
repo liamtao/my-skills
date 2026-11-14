@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "0534096d-5853-409e-b076-de97392f6884",
+  "path": "quant-framework-upgrade",
+  "path_key": "quant-framework-upgrade",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

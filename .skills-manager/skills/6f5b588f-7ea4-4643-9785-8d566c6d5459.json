@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "6f5b588f-7ea4-4643-9785-8d566c6d5459",
+  "path": "oil-studio",
+  "path_key": "oil-studio",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
