@@ -18,6 +18,9 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from file_inventory import package_inventory
+
 # 这些目录/文件从"代码文件清单"里排除：它们是构建产物或编辑器状态，
 # 不属于官方框架的代码内容，混进来只会让增删清单产生噪音。
 NOISE = {".git", "__pycache__", ".DS_Store", ".venv", "venv", ".idea", ".vscode",
@@ -146,6 +149,12 @@ def main():
         return 2
 
     out = {"repo": str(repo), "repo_name": repo_name, "branches": br}
+    if (repo / "pyproject.toml").is_file() and (repo / "uv.lock").is_file():
+        out["dependency_workflow"] = {"kind": "uv-lock", "file": "pyproject.toml"}
+    else:
+        requirements = next((name for name in ("requirements-local.txt", "requirements.txt")
+                             if (repo / name).is_file()), None)
+        out["dependency_workflow"] = {"kind": "requirements" if requirements else "manual", "file": requirements}
 
     # ---- 定位官方包 ----
     if a.package:
@@ -184,7 +193,8 @@ def main():
     # ---- 比对文件清单 ----
     ign = runtime_top_dirs(repo, chosen)
     out["gitignored_top_dirs"] = sorted(ign)
-    off_code, off_runtime = walk_files(chosen, ign)
+    code_files, runtime_files = package_inventory(repo, chosen)
+    off_code, off_runtime = set(code_files), set(runtime_files)
     main_files = {l for l in git(repo, "ls-tree", "-r", "--name-only",
                                  br["official_branch"]).splitlines() if l.strip()}
 
@@ -226,6 +236,7 @@ def main():
 
     p = print
     p(f"仓库          {repo}")
+    p(f"依赖同步      {out['dependency_workflow']}")
     p(f"官方分支      {br['official_branch']}   本地修改分支  {br['local_branch'] or '?? 需要确认'}")
     if not br["local_branch"]:
         p(f"  候选分支: {br['local_candidates']}  ← 有多个，必须先确认用哪个")
@@ -271,7 +282,7 @@ def main():
             for f in only_main:
                 p(f"    - {f}")
     if out["official_runtime_files"]:
-        p(f"  官方包内的运行时数据文件（位于被 gitignore 的 {sorted(ign)}，不进 git 但影响运行）:")
+        p(f"  官方包内的运行时数据文件（未跟踪且被 gitignore 忽略，不进 git 但影响运行）:")
         for f in out["official_runtime_files"][:20]:
             p(f"    ~ {f}")
     if out["dirty_files"]:

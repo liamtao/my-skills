@@ -20,6 +20,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from file_inventory import package_inventory
+
 NOISE = {".git", "__pycache__", ".DS_Store", ".venv", "venv", ".idea", ".vscode",
          ".pytest_cache", ".ruff_cache", ".mypy_cache", "node_modules", ".ipynb_checkpoints"}
 JUNK_HINT = ("__pycache__", ".DS_Store", ".venv/", ".idea/", ".vscode/", ".pyc")
@@ -110,22 +113,21 @@ def main():
         return 2
 
     skip = runtime_tops(repo, pkg)
-    off = official_files(pkg, skip)
+    off, runtime_files = package_inventory(repo, pkg)
     tracked = [l for l in git(repo, "ls-tree", "-r", "--name-only", branch).splitlines() if l.strip()]
     preserve = set(a.preserve)
     to_delete = [f for f in tracked if f not in preserve]
 
     print(f"仓库        {repo}  (分支 {branch})")
     print(f"官方包      {pkg}")
-    print(f"运行时目录  {sorted(skip) or '无'}  ← 官方包里被 gitignore 的目录，不参与代码替换")
+    print(f"运行时目录  {sorted(skip) or '无'}  ← 顶层提示；实际逐文件分类，已跟踪参考文件仍参与更新")
     print(f"将删除旧的已跟踪文件 {len(to_delete)} 个，保留 {sorted(preserve)}")
-    print(f"将写入官方代码文件 {len(off)} 个")
+    print(f"将写入官方跟踪文件 {len(off)} 个；另有未跟踪且被忽略的运行时文件 {len(runtime_files)} 个")
     if a.dry_run:
         print("\n[dry-run] 未做任何修改。")
         return 0
 
     # 在删除代码或覆盖数据之前，完成全部旧运行时文件的备份；备份失败直接停止。
-    runtime_files = [rel for rel in official_files(pkg, set()) if Path(rel).parts[0] in skip]
     if backup is not None:
         backup.mkdir(parents=True, exist_ok=True)
         for rel in runtime_files:
@@ -172,7 +174,7 @@ def main():
     # 5) 精确暂存：git add -u 处理已跟踪文件的改动/删除，再按清单显式 add 新增
     git(repo, "add", "-u")
     for rel in off:
-        git(repo, "add", "--", rel)
+        git(repo, "add", "-f", "--", rel)
     for rel in preserve:
         if (repo / rel).exists():
             git(repo, "add", "--", rel)

@@ -39,7 +39,8 @@ subagent 该"以官方为骨架移植定制"还是"在 dev 基础上打补丁"�
    - 用户自定义的因子加载机制、评价指标、绘图、以及对 core 的扩展。
 
    ⚠️ **`config.py` 例外，别把本条读成"整块留 dev"**：正确解法是
-   **值取 dev、键取并集**。官方新增的配置键必须一个不少地搬过来（用官方的默认值），
+   **业务值取 dev、公共配置键完整保留**。官方新增的公共配置键必须接入实际配置来源（用官方的默认值），
+   动态profile配置应修改公共base/来源defaults而非破坏薄入口。明确互斥的选币/仓管字段保持当前模式，不能机械并集；
    只有"两边都有的键"才保留 dev 的值。整块留 dev 会让官方新键静默消失，
    而且不留任何冲突标记 —— 事后极难发现。真实事故：漏掉 `use_intraday_cache`，
    代码 fallback 把整条因子链路导回旧实现，撞上官方遗留缺陷直接崩。
@@ -82,7 +83,7 @@ git log --oneline -20 {{本地分支}} -- <file>   # dev 侧的改动意图（�
 2. 语法通过：`python3 -c "import ast,sys;ast.parse(open(sys.argv[1],encoding='utf-8').read())" <file>`
 3. 用 `git diff :2:<file> <file>` 自查：改动是否只有你预期的那几处？
    如果冒出意料之外的大段差异，说明误删了 dev 的定制。
-4. **若你负责 `config.py`：必须做键级对账**，确认官方的键一个没丢
+4. **若你负责配置：必须做有效键级对账**。动态配置使用 `verify.py --effective-config`；只有明确选币/仓管互斥框架再加 `--config-layout selection-position`，禁止为凑齐字段而混用模式。下方 grep 仅用于平铺静态配置，不能作为动态配置的验收。确认官方公共键一个没丢
    （输出里带 `<` 的就是被你漏掉的官方键）：
    ```bash
    diff <(git show :3:config.py | grep -oE '^[a-zA-Z_][a-zA-Z0-9_]* *=' | tr -d ' =' | sort -u) \

@@ -62,7 +62,7 @@ python3 "<技能目录>/scripts/scout.py"
    那就让官方版本落地 —— 本地对它的定制会在合并到本地分支时以冲突形式浮现，
    在那一侧解决才是对的位置。
 2. **被 gitignore 的运行时数据要不要更新。** 例如 `data/` 下的最小下单量表、币种分类表。
-   它们不进 git，`git diff` 看不见，但直接影响能否跑起来（官方改过 CSV 编码、加过新 json），
+   仅当这些具体文件未被 Git 跟踪且确实被忽略时，`git diff` 才看不见它们；已跟踪的官方参考文件正常随 main 更新。不能因位于 `data/` 就统一认定为运行时数据。这些未跟踪文件也直接影响能否跑起来（官方改过 CSV 编码、加过新 json），
    而且可能是用户手工维护过的。要问，并且更新前先备份。
 3. **官方跨了大版本且本地改动很重。** 从更新说明判断本次是否有架构级重写
    （例如 pandas → polars）。是的话先告诉用户"冲突会很多、部分定制需要改写而非移植"，
@@ -96,7 +96,7 @@ python3 "<技能目录>/scripts/apply_official.py" \
 
 暂存策略是这里的关键：官方分支的 `.gitignore` 往往极简，不覆盖 `__pycache__`/`.venv`，
 所以**绝不能用 `git add -A`**，否则会把本地分支残留的 pyc 和虚拟环境提交进去。
-脚本用 `git add -u` + 按官方清单显式 add，并在结束时自查暂存区有没有混入垃圾。
+脚本用 `git add -u` + 按已分类的官方文件清单显式 add，并在结束时自查暂存区有没有混入垃圾。分类按具体文件判断：已跟踪文件始终属于官方快照，只有未跟踪且被忽略的文件进入运行时数据分支。精确清单允许强制暂存被新版 ignore 规则覆盖的官方文件，不会把整个 data/ 或 .venv 加入索引。
 
 提交前用 `git diff --cached --stat` 核对，然后**照抄本仓库 main 的既有提交格式**
 （scout 已经列出最近几条），不要自创格式。
@@ -170,7 +170,13 @@ python3 "<技能目录>/scripts/verify.py" --since <升级前本地tag> --python
 真实 import（递归扫描 core 与 configlib/factors/signals 等自定义目录，含新增 capital_flows）。
 语法、配置 AST 与 import 均使用同一实际运行时解释器；默认优先 `.venv`，其他运行环境显式用 `--python`。
 占位符增量范围包含已提交、已暂存、未暂存和未忽略新增文件，合并提交前也不能漏扫。
-官方模块级配置键缺失默认验证失败；未找到静态读取点或 fallback 恰好同值都不能证明其他执行路径安全。
+默认保留静态键全集校验，适用于 A 股及平铺配置框架。若配置经 import 或 `globals().update(load_profile())` 动态组装，使用 `--effective-config` 在临时副本中加载，核对真实生效的属性名，不输出本地配置值；缺少真实键仍失败。`--no-import` 保持完全静态，与该参数不能同时使用。
+
+仅对明确采用选币/仓管互斥协议的框架增加 `--config-layout selection-position`：选币只允许非空 `strategy_list`，仓管只允许非空 `strategy_config` + `strategy_pool`，按变量是否存在判断；空值仍算定义。校验只排除另一种模式的字段，公共键照常全集对账。其他框架保持默认 `flat`，不能套用该例外。
+
+import 在临时源码副本中执行，复制 Git 可见文件及已跟踪参考数据，使用指定解释器、禁用字节码和网络连接，不在真实项目创建日志或缓存。它不是恶意代码安全沙箱，仍需检查导入代码是否使用绝对路径写文件或调用外部程序；实盘入口不能当 import 探针。超时、SystemExit、未登记失败都不能当成功。嵌套 examples/ 辅助脚本仅做静态检查，不直接执行。
+
+既有阻塞/ML/缺数据档案使用明确的 `--import-policy <外部JSON>` 登记，格式及动态配置示例见 [兼容验证](references/compatibility.md)。策略绑定逐文件 SHA-256 和原因；文件改变即拒绝，core 和根 config 不可跳过。可运行 profile 用其正式 loader 验证而非原样 import；历史跳过项单独计数，不称为运行通过。不得用整个目录、通配符或缺依赖自动放行来掩盖新问题。
 
 第 4 层可以脱离升级流程单独跑，用来体检往届欠账：
 `python3 verify.py --no-import`（`--official-ref` 可指定官方分支，默认探测 main/master）。
@@ -218,7 +224,12 @@ python3 "<技能目录>/scripts/verify.py" --since <升级前本地tag> --python
 verify 报"缺第三方依赖"时，先判断是不是升级引入的：
 官方常用元包收口依赖（`requirements.txt` 里只写一个包名），新版引入的三方库
 是靠升级元包带进来的。所以"官方 requirements.txt 没变"不等于依赖没变。
-优先升级元包（`uv lock --upgrade-package <元包>` 然后 `uv sync`），
+先按 scout 输出选择依赖流程：
+
+- `pyproject.toml` 与 `uv.lock` 都存在：使用原有 uv 项目流程，`uv lock --upgrade-package <元包>` 后 `uv sync`。
+- requirements 工作流：优先使用项目已有 `requirements-local.txt`，否则 `requirements.txt`。按官方说明更新必要的本地约束后，`uv pip install --python <实际解释器> --upgrade-package <元包> -r <该文件>`，再 `uv pip check --python <实际解释器>`。不要为升级新增 uv.lock，也不要绕过本地固定版本强装；冲突必须查清约束来源。
+- 其他布局（例如 conda）：沿用项目声明的环境管理方式，scout 的推断仅是提示。
+
 不要单独 pin 一个版本去和官方依赖树打架。缺的库如果本来就没装（如 `lightgbm`），
 还需确认它不影响当前运行；仅已确认的既有可选缺依赖可用 `--allow-missing-dependency lightgbm` 放行并报告，
 不要顺手装。未放行的第三方依赖缺失会使验证失败，不能把失败默认降级成“全部通过”。

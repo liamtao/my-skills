@@ -35,6 +35,9 @@ import sys
 import warnings
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from verify_support import effective_keys, mode_exclusions, import_skips, run_probe
+
 NOISE = {".git", "__pycache__", ".venv", "venv", ".idea", ".vscode", ".pytest_cache",
          ".ruff_cache", ".mypy_cache", "node_modules", ".ipynb_checkpoints"}
 # 真正的冲突标记是"恰好 7 个符号 + 空格或行尾"。必须卡这个边界，否则会误报：
@@ -197,7 +200,16 @@ def main():
     ap.add_argument("--custom-dirs", nargs="*", default=None)
     ap.add_argument("--allow-missing-dependency", nargs="*", default=[], metavar="NAME",
                     help="仅放行已在升级前确认缺失且不影响当前运行的可选依赖（顶层包名）")
+    ap.add_argument("--effective-config", action="store_true",
+                    help="在隔离副本中加载config，核对动态生效的属性名（不输出配置值）")
+    ap.add_argument("--config-layout", choices=("flat", "selection-position"), default="flat",
+                    help="默认保持普通框架键全集；仅显式选择时识别选币/仓管互斥字段")
+    ap.add_argument("--import-policy", help="审阅过的逐文件跳过清单，必须含path/sha256/reason")
     a = ap.parse_args()
+    if a.no_import and a.effective_config:
+        ap.error("--no-import不能与--effective-config同时使用：后者会执行配置代码")
+    if a.config_layout != "flat" and not a.effective_config:
+        ap.error("selection-position布局需要--effective-config核验真实模式")
 
     repo = Path(git(Path(a.repo), "rev-parse", "--show-toplevel").strip() or a.repo)
     py = str(Path(a.python or find_python(repo)).expanduser().absolute())
@@ -207,6 +219,10 @@ def main():
         # AST 语法/配置解析也必须使用运行时版本，不能只把 import 切到 venv。
         return subprocess.run([py, str(Path(__file__).resolve()), *sys.argv[1:], "--python", py]).returncode
     problems, warns = 0, 0
+    try:
+        skips = import_skips(repo, a.import_policy)
+    except (ValueError, KeyError, OSError) as error:
+        ap.error(str(error))
 
     # ---- 1. 冲突标记 ----
     hits = []
@@ -289,7 +305,18 @@ def main():
     else:
         off = config_assignments(off_src)
         loc = config_assignments(local_cfg.read_text(encoding="utf-8", errors="ignore"))
-        missing = sorted(set(off) - set(loc))
+        excluded = set()
+        if a.effective_config:
+            try:
+                live = effective_keys(repo, py)
+                if a.config_layout == "selection-position":
+                    excluded = mode_exclusions(live['keys'], live['selection'], live['position'])
+                loc = {key: (None, False, False, True) for key in live['keys']}
+                print(f"        动态配置：隔离副本加载成功；互斥字段排除 {sorted(excluded)}")
+            except (ValueError, RuntimeError) as error:
+                print(f"        ✗ 有效配置校验失败: {error}")
+                problems += 1
+        missing = sorted(set(off) - set(loc) - excluded)
         reads = scan_config_reads(repo)
         hard, soft = [], []
         for k in missing:
@@ -332,7 +359,7 @@ def main():
         for s in soft:
             print(f"        ⚠ {s}")
         if hard:
-            print("        ^ 官方配置键缺失，补进本地 config.py 后重新验证")
+            print("        ^ 核对有效配置来源及互斥模式；动态配置请用--effective-config，勿机械补齐另一模式字段")
         problems += len(hard)
         warns += len(soft)
 
@@ -347,9 +374,9 @@ def main():
                       if p.name not in NOISE and (p.is_dir() or p.suffix == ".py")}
         code = f'''
 import importlib, pathlib, sys, json
-sys.path.insert(0, {str(repo)!r})
-repo = pathlib.Path({str(repo)!r})
-out = {{"core_ok": 0, "core_fail": [], "custom": []}}
+repo = pathlib.Path.cwd()
+out = {{"core_ok": 0, "core_fail": [], "custom": [], "skipped": []}}
+skips = {skips!r}
 
 def imp(mod):
     try:
@@ -379,21 +406,41 @@ for d in {custom!r}:
     for p in sorted(base.rglob("*.py")):
         if any(part in {NOISE!r} for part in p.relative_to(base).parts): continue
         if p.name == "__init__.py": continue
+        relative = p.relative_to(repo).as_posix()
+        if relative in skips:
+            entry = skips[relative]
+            if not entry.get("loader"):
+                out["skipped"].append([relative, entry["reason"]])
+                continue
+            try:
+                module, function = entry["loader"].split(":")
+                value = getattr(importlib.import_module(module), function)(relative)
+                if not isinstance(value, dict) or not value:
+                    raise ValueError("profile loader must return a nonempty configuration dictionary")
+            except BaseException as error:
+                fails.append([str(p.relative_to(base)), f"{{type(error).__name__}}: {{error}}"])
+            else:
+                ok += 1
+            continue
+        if any(part in ("examples", "example") for part in p.relative_to(base).parts):
+            out["skipped"].append([relative, "样例/辅助脚本仅做静态检查，不作为模块import探针"])
+            continue
         e = imp(".".join(p.relative_to(repo).with_suffix("").parts))
         if e: fails.append([str(p.relative_to(base)), e])
         else: ok += 1
     out["custom"].append([d, ok, fails])
 print("@@JSON@@" + json.dumps(out, ensure_ascii=False))
 '''
-        r = subprocess.run([py, "-c", code], cwd=str(repo), capture_output=True, text=True)
-        line = next((l for l in r.stdout.splitlines() if l.startswith("@@JSON@@")), None)
-        print(f"[5/5] import (venv: {Path(py).parent.parent.name if '.venv' in py else py})")
-        if not line:
-            print(f"        ✗ 探针进程未返回结果: {(r.stderr or r.stdout).strip()[:400]}")
+        print(f"[5/5] import (venv: {py}; 隔离副本)")
+        try:
+            d = run_probe(repo, py, code)
+        except RuntimeError as error:
+            print(f"        ✗ {error}")
             problems += 1
         else:
-            import json as _j
-            d = _j.loads(line[8:])
+            for path, reason in d['skipped']:
+                print(f"        ⚠ 已登记跳过 {path}: {reason}")
+            warns += len(d['skipped'])
 
             def classify(err):
                 """缺第三方依赖单列展示，但不能自动假定它是既有可选依赖。"""
@@ -440,7 +487,7 @@ print("@@JSON@@" + json.dumps(out, ensure_ascii=False))
     else:
         verdict = "静态检查通过（未运行 import）" if a.no_import else "检查通过"
     if warns:
-        verdict += f"（另有 {warns} 处告警：缺依赖 / config 缺键，需逐条判断是否既有状况）"
+        verdict += f"（另有 {warns} 处告警：已登记跳过 / 样例静态检查 / 可选依赖 / 条件配置，需逐条复核）"
     print(f"结论: {verdict}")
     return 0 if problems == 0 else 1
 
