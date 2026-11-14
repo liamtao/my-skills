@@ -10,10 +10,12 @@
     "antigravity_cli": true,
     "claude_code": true,
     "cline": true,
+    "codebuddy": true,
     "codex": true,
     "opencode": true,
     "qwen_code": true,
     "warp": true,
-    "workbuddy": true
+    "workbuddy": true,
+    "workbuddy_overseas": true
   }
 }

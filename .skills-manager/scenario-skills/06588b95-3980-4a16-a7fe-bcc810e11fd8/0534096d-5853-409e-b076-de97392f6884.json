@@ -7,9 +7,9 @@
     "antigravity": true,
     "antigravity_2_0": true,
     "antigravity_cli": true,
-    "claude_code": true,
+    "claude_code": false,
     "codebuddy": true,
-    "codex": true,
+    "codex": false,
     "workbuddy_overseas": true
   }
 }
