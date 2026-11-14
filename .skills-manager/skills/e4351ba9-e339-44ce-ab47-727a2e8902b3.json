@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "e4351ba9-e339-44ce-ab47-727a2e8902b3",
+  "path": "a2b2-pr-to-linear",
+  "path_key": "a2b2-pr-to-linear",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

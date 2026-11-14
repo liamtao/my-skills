@@ -1,0 +1,3 @@
+interface:
+  display_name: "极空间 Z4 连接"
+  short_description: "连接家中极空间 Z4，自动检查并挂载 SMB，从钥匙串读取账号密码进行 SSH 访问"

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "8aa5dc1c-9e71-4bda-9b92-72b7f3343eb8",
+  "path": "z4-connect",
+  "path_key": "z4-connect",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

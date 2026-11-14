@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "43805118-f4ac-424c-a96e-ad81d0777cc3",
+  "path": "a2b2-start-dev",
+  "path_key": "a2b2-start-dev",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

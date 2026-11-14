@@ -1,0 +1,4 @@
+interface:
+  display_name: "Import or Update Switch Games"
+  short_description: "Build and archive Switch games for NX2Apple on Mac"
+  default_prompt: "Use $nx2apple-import-game to import or update this Switch game in NX2Apple, following this project's build and storage rules."

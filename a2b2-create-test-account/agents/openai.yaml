@@ -1,0 +1,4 @@
+interface:
+  display_name: "A2B2 测试账号注册"
+  short_description: "通过 ego-browser 注册 SIT 账号、邮箱验证并完成 Stripe 沙盒订阅"
+  default_prompt: "使用 $a2b2-create-test-account 创建指定邮箱的 SIT 测试账号，并验证套餐已启用。"

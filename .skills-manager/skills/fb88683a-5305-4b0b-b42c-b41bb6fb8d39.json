@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "fb88683a-5305-4b0b-b42c-b41bb6fb8d39",
+  "path": "a2b2-stacked-branches",
+  "path_key": "a2b2-stacked-branches",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

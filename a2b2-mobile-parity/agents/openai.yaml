@@ -1,0 +1,4 @@
+interface:
+  display_name: "Portal Mobile 与 iOS 差异对照"
+  short_description: "核对 A2B2 双端功能、接口和体验差异，以左右红框截图逐项确认改法"
+  default_prompt: "使用 $a2b2-mobile-parity，检查指定模块的 Portal Mobile 与 iOS 差异；功能和接口以 Portal Mobile 为基准，UI/交互择优，先交付左 Portal、右 iOS 的编号红框对照与明确改法，保留已有确认。"

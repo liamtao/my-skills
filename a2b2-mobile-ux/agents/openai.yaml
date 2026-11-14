@@ -1,0 +1,4 @@
+interface:
+  display_name: "A2B2 Mobile UX"
+  short_description: "对照双端交互，先交付 Portal Mobile 评审，确认后再同步至 iOS"
+  default_prompt: "使用 $a2b2-mobile-ux 优化这个 A2B2 移动端页面：先核对双端差异，在 Portal Mobile 交付可评审方案，确认后再移植至 iOS。"

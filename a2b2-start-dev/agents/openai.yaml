@@ -1,0 +1,2 @@
+interface:
+  default_prompt: "使用 $a2b2-start-dev 开启 A2B2 开发调试环境。"

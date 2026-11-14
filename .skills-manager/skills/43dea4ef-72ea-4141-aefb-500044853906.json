@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "43dea4ef-72ea-4141-aefb-500044853906",
+  "path": "a2b2-mobile-ux",
+  "path_key": "a2b2-mobile-ux",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

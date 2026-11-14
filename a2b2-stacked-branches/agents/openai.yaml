@@ -1,0 +1,4 @@
+interface:
+  display_name: "A2B2 叠加分支管理"
+  short_description: "刷新 main、核验 PR 合并、整理叠加链并清理本地已合并分支"
+  default_prompt: "使用 $a2b2-stacked-branches 刷新远端 main，检查当前叠加链的 PR，整理本地依赖并删除已完整合并的本地分支。"

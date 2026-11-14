@@ -1,0 +1,62 @@
+#!/usr/bin/expect -f
+# Authentication stays hidden; only the remote command's output is displayed.
+log_user 0
+if {$argc != 7} {puts stderr "SSH helper requires seven arguments"; exit 2}
+lassign $argv host port account service timeout use_sudo command
+
+proc fail {message} {
+    puts stderr $message
+    exit 1
+}
+proc shell_quote {value} {
+    return "'[string map [list ' '\\''] $value]'"
+}
+
+if {[catch {exec /usr/bin/security find-generic-password -s $service -a $account -w} password]} {
+    fail "钥匙串密码不可用，请检查解锁状态及访问授权"
+}
+set script "printf '__Z4_COMMAND_READY__\\n'; exec sh -c [shell_quote $command]"
+if {$use_sudo} {
+    set remote "sudo -S -p '__Z4_SUDO_PASSWORD__' -- sh -c [shell_quote $script]"
+} else {
+    set remote "sh -c [shell_quote $script]"
+}
+spawn -noecho /usr/bin/ssh -T -o StrictHostKeyChecking=yes \
+    -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 \
+    -o PreferredAuthentications=password,keyboard-interactive \
+    -o NumberOfPasswordPrompts=1 -p $port -l $account $host $remote
+set ssh_prompts 0
+set sudo_prompts 0
+expect {
+    -exact "__Z4_SUDO_PASSWORD__" {
+        incr sudo_prompts
+        if {$sudo_prompts > 1} {fail "sudo 认证失败"}
+        send -- "$password\r"
+        exp_continue -continue_timer
+    }
+    -re {(?i)password:[ \t]*$} {
+        incr ssh_prompts
+        if {$ssh_prompts > 1} {fail "SSH 认证失败"}
+        send -- "$password\r"
+        exp_continue -continue_timer
+    }
+    -re {__Z4_COMMAND_READY__\r?\n} {}
+    -re {(?i)(host key verification failed|remote host identification has changed)} {
+        fail "SSH 主机密钥未通过检查，请核验设备指纹和 known_hosts"
+    }
+    timeout {fail "SSH 连接或认证超时"}
+    eof {fail "SSH 或 sudo 连接失败，请检查网络、服务及凭据"}
+}
+unset password
+expect {
+    -re {(?s).+} {
+        puts -nonewline stdout $expect_out(0,string)
+        flush stdout
+        exp_continue -continue_timer
+    }
+    timeout {fail "远程命令等待超时；修改操作请先检查远端状态再决定是否重试"}
+    eof {}
+}
+set result [wait]
+if {[lindex $result 2] != 0 || [llength $result] > 4} {exit 1}
+exit [lindex $result 3]

@@ -1,0 +1,4 @@
+interface:
+  display_name: "OK云 覆写编辑"
+  short_description: "编辑校验 OK云 分流覆写，保存后自动重载，需要重启时由用户完成"
+  default_prompt: "使用 $okyun-overrides 修改 OK云 分流覆写，校验后在客户端保存并自动重载；需要退出或重启时提醒我完成。"

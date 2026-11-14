@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "243faed4-a930-45b6-b07c-ec3498bbd89c",
+  "path": "a2b2-create-test-account",
+  "path_key": "a2b2-create-test-account",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

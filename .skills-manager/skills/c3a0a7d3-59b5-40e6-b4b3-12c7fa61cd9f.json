@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "c3a0a7d3-59b5-40e6-b4b3-12c7fa61cd9f",
+  "path": "okyun-overrides",
+  "path_key": "okyun-overrides",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

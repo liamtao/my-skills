@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "a8484e30-f539-49c8-9e75-7a7249cd4994",
+  "path": "nx2apple-import-game",
+  "path_key": "nx2apple-import-game",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

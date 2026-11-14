@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "b361e01c-d41d-44ab-b909-e1bb2b2fb2cb",
+  "path": "a2b2-mobile-parity",
+  "path_key": "a2b2-mobile-parity",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "import",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
