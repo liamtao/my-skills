@@ -61,6 +61,8 @@ Check available MCPs - if useful for research (searching docs, finding similar s
 
 ### Write the SKILL.md
 
+For local Codex use, respect an explicit destination; otherwise store user skills in `~/.agents/skills` and repository-specific skills in the repository’s `.agents/skills`. Keep bundled system skills in their managed location.
+
 Based on the user interview, fill in these components:
 
 - **name**: Skill identifier
