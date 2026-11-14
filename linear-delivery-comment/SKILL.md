@@ -6,8 +6,8 @@ description: >-
   "记录到 Linear", "写个交付 comment", "同步进展到 Linear", "交付了跟我过一遍 comment", or any time Ben
   references pushing a design change and a Linear ticket in the same breath. Drafts a structured
   bilingual delivery comment (改动点 / 交互逻辑 / Commit / 状态·抄送), confirms it with Ben,
-  then posts it via the Linear MCP and handles the review branch (In Review + @reviewers, or status
-  unchanged + @cc). Also handles buffering: when Ben says "存草稿别发 / 先存着", save the comment to a
+  then posts it via the Linear MCP with the chosen reviewers or cc recipients. Ticket status stays
+  unchanged unless Ben explicitly requests a status change. Also handles buffering: when Ben says "存草稿别发 / 先存着", save the comment to a
   local draft file instead of posting; when he says "发 XXX 的草稿", publish a held draft. Do NOT
   default to @-mentioning Trista.
 ---
@@ -19,6 +19,10 @@ the work on the matching Linear ticket. The comment is read by **two audiences a
 (who sees what shipped from the delivery trail, not from status churn) and the **engineering team**
 (who need enough interaction detail to build it). This skill produces one comment that serves both,
 then posts it and moves the ticket per Ben's instruction.
+
+## Status authorization
+
+Keep Linear status unchanged unless Ben explicitly requests the status change for the named ticket(s). This includes parent tickets and subtickets. Approval to implement, test, commit, push, upload, open a PR, deploy, publish a comment, invoke this skill or request review does not authorize a status change.
 
 ## Why the comment looks the way it does
 
@@ -47,22 +51,22 @@ then posts it and moves the ticket per Ben's instruction.
 3. **Draft the comment** using the exact template below. Keep 改动点 to user-perceivable changes (this
    project is UI/UX only — no implementation detail there); put the build-facing behaviour in 交互逻辑.
 
-4. **Ask Ben whether this needs review by others**, and who — this drives both the status and the
-   @mentions. Use one AskUserQuestion with the two rosters:
+4. **Ask Ben whether this needs review by others**, and who — this determines the @mentions only.
+   Use one AskUserQuestion with the two rosters:
    - **需要 review** → reviewers chosen from **Teresa / Danny / Ashok** (multi-select).
    - **不需要 review**（只抄送知悉）→ recipients chosen from **Zyron / Rex / Jon / Neo** (multi-select).
    Let Ben pick "不@任何人" too. **Never auto-mention Trista.**
 
-5. **Show the finished comment and the intended status change, and wait for Ben's explicit go** before
+5. **Show the finished comment and wait for Ben's explicit go** before
    writing anything to Linear. This is a shared team tracker — nothing posts without confirmation, and
    Ben may be buffering (he sometimes finishes early and reveals later). If he says "存草稿别发 / 先存着",
    do NOT post — switch to **Draft-and-hold mode** (see the section below) and stop.
+   Include a proposed status change only when Ben explicitly requested it. Approval to post the comment alone leaves status unchanged.
 
-6. **On confirmation, post and move:**
+6. **On confirmation, post:**
    - Post the comment: `save_comment` with `issueId:"<A2B-xxx>"` and `body:<comment>`.
-   - **If review needed:** set status to **In Review** via `save_issue` `id:"<A2B-xxx>"`, `state:"In Review"`.
-    - If there's no ”In Review“ status. keep "In Progress"
-   - **If no review needed:** leave the status unchanged. Only post the comment with the @cc mentions.
+   - Leave status unchanged for both review and cc branches unless Ben explicitly requested a status change.
+   - For an explicitly requested change, resolve the target status for the owning team, change only the named ticket(s), then read back the result. If the requested status is unavailable, report that and preserve the current status; do not substitute another status.
 
 7. **Provide issue URL:** Always output the clickable URL of the target Linear issue (e.g. `https://linear.app/.../issue/<TICKET>` or the `url` field returned by Linear MCP) in your final response to Ben so he can easily click and jump to it in the browser.
 
@@ -87,13 +91,14 @@ Fill this exactly. Use literal newlines (the Linear MCP wants real markdown, not
 - <GitHub 链接>
 
 **状态·抄送**
-- <见下方"状态·抄送行"两种写法>
+- <见下方"状态·抄送行">
 ```
 
-**状态·抄送行 — 两种写法：**
+**状态·抄送行：**
 
-- 需要 review：`已转 In Review，请 @teresa @danny review。`（只列 Ben 选中的 reviewer）
+- 需要 review：`状态不变，请 @teresa @danny review。`（只列 Ben 选中的 reviewer）
 - 不需要 review：`状态不变，@zyron @rex 知悉。`（只列 Ben 选中的抄送人）
+- 仅当 Ben 明确要求变更状态时：预览写 `按要求转为 <状态>，请 @<reviewer> review。`，执行后核验该状态；未成功时不得报告已变更。
 
 ## People roster
 
@@ -101,9 +106,9 @@ Mention with `@displayName`. The two groups map to the two branches in step 4.
 
 | 名字 | @displayName | email | 组 |
 |---|---|---|---|
-| Teresa | `@teresa` | teresa@a2b2.ai | Review（→ In Review）|
-| Danny | `@danny` | danny@a2b2.ai | Review（→ In Review）|
-| Ashok | `@ashok` | ashok@a2b2.ai | Review（→ In Review）|
+| Teresa | `@teresa` | teresa@a2b2.ai | Review（状态不变）|
+| Danny | `@danny` | danny@a2b2.ai | Review（状态不变）|
+| Ashok | `@ashok` | ashok@a2b2.ai | Review（状态不变）|
 | Zyron | `@zyron` | zyron@a2b2.ai | 抄送（状态不变）|
 | Rex | `@rex` | rex@a2b2.ai | 抄送（状态不变）|
 | Jon | `@jon` | jon@a2b2.ai | 抄送（状态不变）|
@@ -140,10 +145,10 @@ For `A2B-268` "[设计·Ben] Own 连接状态与重认证反馈", review by Tere
 - https://github.com/.../commit/xxxxxxx
 
 **状态·抄送**
-- 已转 In Review，请 @teresa @danny review。
+- 状态不变，请 @teresa @danny review。
 ```
 
-Then: `save_issue id:"A2B-268" state:"In Review"`.
+Post the approved comment only. This review request does not authorize a `save_issue` status update.
 
 ## Draft-and-hold mode (buffer)
 
@@ -153,8 +158,8 @@ Linear**, as a local file in `.linear-drafts/` (git-ignored, never committed, ne
 
 **Saving a draft** — triggered by "存草稿别发 / 先存着 / 存下来 / 先不发":
 - Do steps 1–3 as normal (identify ticket, gather the real change, draft the comment).
-- **Skip the review/@mention/status questions** — who reviews and whether to move status are *reveal-time*
-  decisions, made when the draft is published, not now.
+- **Skip the review/@mention questions** — recipients are chosen when the draft is published, not now.
+  Status stays unchanged unless Ben explicitly requests otherwise.
 - Write the comment body to `.linear-drafts/<TICKET>.md` (e.g. `.linear-drafts/ENG-287.md`). Leave the
   状态·抄送 line as a placeholder: `- <发布时确定：review / 抄送 / 状态>`.
 - Keep the `**设计交付如下（给AI作为context）**` header.
@@ -163,7 +168,7 @@ Linear**, as a local file in `.linear-drafts/` (git-ignored, never committed, ne
 **Publishing a held draft** — triggered by "发 <TICKET> 的草稿 / 把 ENG-287 的草稿发了":
 - Read `.linear-drafts/<TICKET>.md`, show it to Ben.
 - Now run the normal **step 4** review branch question and fill the 状态·抄送 line.
-- On his go: `save_comment` (+ status change per branch, with the ENG- "no In Review" guard from step 6).
+- On his go: `save_comment`. Change status only if Ben explicitly requested it, following step 6.
 - **Delete the draft file** after a successful post, so it can't be double-published.
 
 **Listing drafts** — if Ben asks "有哪些草稿 / 还有什么没发", list the files in `.linear-drafts/`.

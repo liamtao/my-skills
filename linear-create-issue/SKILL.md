@@ -5,6 +5,8 @@ description: Create a well-structured A2B2 Linear issue with full background —
 
 # A2B2 Linear Ticket Builder
 
+**Status authorization:** For new tickets, omit the state field and use the team's creation default unless Ben explicitly requests a state. Keep existing tickets, parents and subtickets at their current status unless Ben explicitly requests the status change for those tickets. Creating or updating ticket content, invoking this skill, implementing, testing, committing, pushing, uploading, creating a PR, deploying or requesting review does not authorize a status change.
+
 Turn a rough request into a clean, self-contained Linear issue that follows A2B2's team conventions. The person you are talking to is **Ben** (`ben@a2b2.ai` / Tao Ziliang) — **talk to him in Simplified Chinese** while gathering info and confirming, but **write the ticket content in English by default** (see language rule).
 
 Core promises of this skill:
@@ -261,7 +263,7 @@ If unsure which module, pick the closest and mention it in the draft so Ben can 
 2. **Wait for explicit confirmation.** Offer quick edits (title wording, assignee, stakeholders, priority, and the split itself — merge/split further).
 3. **On confirm**, create each ticket via `save_issue` (no `id`) with: `title`, `team`, `description`, `labels`, `assignee`, plus any of `priority`/`dueDate`/`project`/`parentId` that were set. When you split, set the same `parentId` on every child (create the umbrella parent first if it's new). Stakeholder subscriptions ride along via the `@displayName` mentions in `description`.
 3a. **If Ben provided design images/videos**, run the Media-embedding workflow (Step 3.5) against the now-existing issue(s) and attach/embed them under **Expected Behavior & Acceptance Criteria** (or under Current Behavior for bug evidence).
-4. **Report back** every created issue's identifier + URL (and the parent, if new). If a bug, remind Ben the `Bug` label is set and to move the status as work starts (Todo → In Progress → In Review → Done).
+4. **Report back** every created issue's identifier + URL (and the parent, if new). If a bug, confirm the `Bug` label is set. Report the saved status; do not progress it automatically.
 5. **If a Notion URL was referenced during the request**, proceed to Step 8 (Notion backlink workflow).
 
 ---

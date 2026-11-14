@@ -41,8 +41,8 @@ description: Manage the user's shared agent-skill library via skills-manager-cli
      standalone download, a hand-built binary). Use it, but note it can be
      older than a desktop app if one is also installed.
 
-   If nothing is printed at all, this skill doesn't apply — fall back to
-   find-skills, or tell the user to install Skills Manager.
+   If nothing is printed at all, this skill doesn't apply — tell the user to
+   install Skills Manager.
 2. **Always pass `--json` when you parse output yourself.** Pretty-printed output is for the user; JSON is for you. Errors include `ok=false`, a stable `code`, and `message` on stderr with a non-zero exit code.
 
 ```bash
