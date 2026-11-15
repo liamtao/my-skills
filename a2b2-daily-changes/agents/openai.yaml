@@ -1,0 +1,4 @@
+interface:
+  display_name: "A2B2 Daily Changes"
+  short_description: "Save daily changes and consolidate unconsumed records"
+  default_prompt: "Use $a2b2-daily-changes to save daily changes using the invocation-time date default, or consolidate all unconsumed daily records into Chinese version notes, following asd-ste100."

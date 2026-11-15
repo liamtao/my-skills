@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "e1044284-d5ec-4a96-a613-554f77feb6ff",
+  "path": "ben-a2b2-portal-https",
+  "path_key": "ben-a2b2-portal-https",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "b06d3d7d-88f9-4b3d-abfd-df6ca08e948f",
+  "path": "a2b2-daily-changes",
+  "path_key": "a2b2-daily-changes",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
