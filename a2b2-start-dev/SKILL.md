@@ -1,6 +1,6 @@
 ---
 name: a2b2-start-dev
-description: "Start or reuse A2B2 local development services when asked to 开启 iOS 模拟器、Mobile、Metro、Portal 服务、启动官网 or Marketing. iOS includes Metro. Named targets start only those surfaces; with no target named, it starts iOS and Portal."
+description: "Start or reuse A2B2 local development services when asked to 开启 iOS 模拟器、Mobile、Metro、Portal 服务、启动官网 or Marketing. iOS includes Metro. Named targets start only those surfaces; with no target named, it starts iOS and Portal. Portal HTTPS testing is optional and requires an explicit HTTPS request."
 ---
 
 # Start A2B2 development
@@ -13,11 +13,14 @@ Prepare the requested local surfaces and leave them running for development. Use
 | --- | --- |
 | `ios`, `iOS 模拟器`, `mobile` | iOS Simulator, A2B2 native app, and Metro |
 | `portal`, `Portal 服务`, `web` | Portal only |
+| Explicit `Portal HTTPS` / `开启 HTTPS 测试` | Portal plus the optional HTTPS proxy |
 | `启动官网`, `官网`, `marketing` | Marketing only |
 | Multiple named targets | Only the requested targets |
 | No target specified | iOS Simulator, A2B2 native app, Metro, and Portal |
 
 An explicit narrower request takes precedence, such as Metro only. Do not start the other surface for a single-target request. Existing unrelated services can remain running.
+
+Portal uses HTTP by default. Start HTTPS only when the user explicitly requests HTTPS testing; ordinary Portal startup, LAN access, or Voice Input testing alone does not enable it. Without that request, leave any existing HTTPS listener unchanged and skip HTTPS setup and startup.
 
 ## Check the environment
 
@@ -47,6 +50,10 @@ Verify the rendered page and authenticated reads from the LAN origin; an HTTP 20
 - If startup after dependency installation produces an invalid React hook error, inspect React resolution and Vite logs. When stale dependency optimization is confirmed, restart only this task's Vite with `pnpm dev --host 0.0.0.0 --force` and recheck rendering.
 - For API connection errors, compare the actual browser origin with the backend's CORS response using a credential-free OPTIONS request to the affected endpoint. Do not alter remote CORS configuration as part of starting the environment.
 - Leave account login to the user unless they ask to log in. Never store credentials in this skill or environment records.
+
+### Optional Portal HTTPS
+
+Only for an explicit HTTPS testing request, follow [Portal HTTPS startup](references/portal-https.md). The local entry is `~/.config/a2b2/portal-https/start.sh`; it runs a Caddy TLS proxy to the existing Portal on `3000` and a separate iPhone certificate-installation page. Read and validate its configuration before running it. This entry is separate from normal Portal startup and Alfred's default workflow.
 
 ## Marketing (官网)
 
