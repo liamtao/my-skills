@@ -5,7 +5,7 @@
   "path_key": "recording-decisions",
   "enabled": true,
   "tags": [
-    "Tagged"
+    "用途:领域建模"
   ],
   "source": {
     "type": "import",

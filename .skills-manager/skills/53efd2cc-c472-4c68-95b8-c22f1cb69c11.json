@@ -5,7 +5,9 @@
   "path_key": "karpathy-supply-chain-hygiene",
   "enabled": true,
   "tags": [
-    "Karpathy"
+    "主题:Karpathy",
+    "来源:LearnPrompt",
+    "用途:安全"
   ],
   "source": {
     "type": "git",

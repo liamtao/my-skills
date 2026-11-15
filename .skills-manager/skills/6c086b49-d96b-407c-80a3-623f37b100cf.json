@@ -5,7 +5,8 @@
   "path_key": "setup-matt-pocock-skills",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:工程流程"
   ],
   "source": {
     "type": "git",

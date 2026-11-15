@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "e017576f-f30f-40be-926e-565fbb0a537d",
+  "name": "全局 · 工程基础",
+  "description": "跨项目常驻；项目不重复部署。管理、浏览器、诊断、测试、审查及模块设计。",
+  "icon": null,
+  "sort_order": 999
+}

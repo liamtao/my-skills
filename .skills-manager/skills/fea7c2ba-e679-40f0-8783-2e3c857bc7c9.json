@@ -4,7 +4,10 @@
   "path": "writing-fragments",
   "path_key": "writing-fragments",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "来源:MattPocock",
+    "用途:写作"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/mattpocock/skills",

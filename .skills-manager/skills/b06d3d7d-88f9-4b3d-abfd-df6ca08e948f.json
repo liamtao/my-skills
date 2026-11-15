@@ -4,7 +4,10 @@
   "path": "a2b2-daily-changes",
   "path_key": "a2b2-daily-changes",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:变更记录",
+    "项目:A2B2"
+  ],
   "source": {
     "type": "local",
     "ref": null,

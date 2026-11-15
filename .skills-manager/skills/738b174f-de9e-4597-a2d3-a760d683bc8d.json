@@ -5,7 +5,9 @@
   "path_key": "ask-sonner",
   "enabled": true,
   "tags": [
-    "Animation"
+    "技术:Sonner",
+    "来源:Emil",
+    "用途:组件使用"
   ],
   "source": {
     "type": "git",

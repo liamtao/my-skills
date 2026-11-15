@@ -4,7 +4,10 @@
   "path": "git-guardrails-claude-code",
   "path_key": "git-guardrails-claude-code",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "来源:MattPocock",
+    "用途:安全"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/mattpocock/skills",

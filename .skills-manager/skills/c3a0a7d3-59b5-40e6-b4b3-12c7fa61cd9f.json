@@ -4,7 +4,9 @@
   "path": "okyun-overrides",
   "path_key": "okyun-overrides",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:网络配置"
+  ],
   "source": {
     "type": "import",
     "ref": null,

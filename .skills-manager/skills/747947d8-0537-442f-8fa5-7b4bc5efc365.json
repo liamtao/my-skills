@@ -4,7 +4,9 @@
   "path": "graphify",
   "path_key": "graphify",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:知识管理"
+  ],
   "source": {
     "type": "import",
     "ref": null,

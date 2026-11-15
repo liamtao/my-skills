@@ -5,7 +5,7 @@
   "path_key": "sigma",
   "enabled": true,
   "tags": [
-    "Tagged"
+    "用途:教学"
   ],
   "source": {
     "type": "skillssh",

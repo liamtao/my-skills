@@ -5,7 +5,8 @@
   "path_key": "to-tickets",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:需求规划"
   ],
   "source": {
     "type": "git",

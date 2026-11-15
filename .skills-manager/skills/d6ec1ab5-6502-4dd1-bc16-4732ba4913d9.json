@@ -5,7 +5,8 @@
   "path_key": "wait-what",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:沟通"
   ],
   "source": {
     "type": "git",

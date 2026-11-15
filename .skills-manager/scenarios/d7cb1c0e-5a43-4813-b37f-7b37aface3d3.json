@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "d7cb1c0e-5a43-4813-b37f-7b37aface3d3",
+  "name": "项目 · 规格驱动开发",
+  "description": "依赖全局工程基础；首次使用需按需运行setup-matt-pocock-skills配置项目约定。",
+  "icon": null,
+  "sort_order": 999
+}

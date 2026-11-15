@@ -4,7 +4,10 @@
   "path": "ben-a2b2-portal-https",
   "path_key": "ben-a2b2-portal-https",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:开发环境",
+    "项目:A2B2"
+  ],
   "source": {
     "type": "local",
     "ref": null,

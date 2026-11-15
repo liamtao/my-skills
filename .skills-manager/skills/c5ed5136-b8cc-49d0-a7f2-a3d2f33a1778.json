@@ -4,7 +4,9 @@
   "path": "asd-ste100",
   "path_key": "asd-ste100",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:写作"
+  ],
   "source": {
     "type": "local",
     "ref": null,

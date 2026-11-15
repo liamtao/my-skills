@@ -5,7 +5,8 @@
   "path_key": "domain-modeling",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:领域建模"
   ],
   "source": {
     "type": "git",

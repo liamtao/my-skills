@@ -4,7 +4,9 @@
   "path": "herdr",
   "path_key": "herdr",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:终端管理"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/herdrdev/herdr",

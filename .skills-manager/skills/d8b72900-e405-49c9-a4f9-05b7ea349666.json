@@ -5,7 +5,8 @@
   "path_key": "pick-ui-library",
   "enabled": true,
   "tags": [
-    "Animation"
+    "来源:Emil",
+    "用途:组件选型"
   ],
   "source": {
     "type": "git",

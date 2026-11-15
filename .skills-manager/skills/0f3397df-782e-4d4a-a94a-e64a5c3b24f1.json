@@ -5,7 +5,9 @@
   "path_key": "karpathy-understanding-first",
   "enabled": true,
   "tags": [
-    "Karpathy"
+    "主题:Karpathy",
+    "来源:LearnPrompt",
+    "用途:审查"
   ],
   "source": {
     "type": "git",

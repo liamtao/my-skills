@@ -5,7 +5,9 @@
   "path_key": "gsap-react",
   "enabled": true,
   "tags": [
-    "gasp"
+    "技术:GSAP",
+    "技术:React",
+    "用途:动效"
   ],
   "source": {
     "type": "local",

@@ -5,7 +5,8 @@
   "path_key": "ask-matt",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:技能管理"
   ],
   "source": {
     "type": "git",

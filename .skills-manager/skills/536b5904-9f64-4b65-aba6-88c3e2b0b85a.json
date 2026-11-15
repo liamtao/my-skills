@@ -5,7 +5,8 @@
   "path_key": "teach",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:教学"
   ],
   "source": {
     "type": "git",

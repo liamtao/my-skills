@@ -5,7 +5,8 @@
   "path_key": "diagnosing-bugs",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:诊断"
   ],
   "source": {
     "type": "git",

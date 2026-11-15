@@ -5,7 +5,8 @@
   "path_key": "tdd",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:测试"
   ],
   "source": {
     "type": "git",

@@ -4,7 +4,10 @@
   "path": "a2b2-mobile-parity",
   "path_key": "a2b2-mobile-parity",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:审查",
+    "项目:A2B2"
+  ],
   "source": {
     "type": "import",
     "ref": null,

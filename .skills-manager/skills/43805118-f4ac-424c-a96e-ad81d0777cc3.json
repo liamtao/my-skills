@@ -4,7 +4,10 @@
   "path": "a2b2-start-dev",
   "path_key": "a2b2-start-dev",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:开发环境",
+    "项目:A2B2"
+  ],
   "source": {
     "type": "import",
     "ref": null,

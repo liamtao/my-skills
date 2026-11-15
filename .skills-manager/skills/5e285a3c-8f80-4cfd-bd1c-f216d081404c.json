@@ -5,7 +5,9 @@
   "path_key": "karpathy-meta-reflection",
   "enabled": true,
   "tags": [
-    "Karpathy"
+    "主题:Karpathy",
+    "来源:LearnPrompt",
+    "用途:复盘"
   ],
   "source": {
     "type": "git",

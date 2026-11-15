@@ -5,7 +5,8 @@
   "path_key": "find-animation-opportunities",
   "enabled": true,
   "tags": [
-    "Animation"
+    "来源:Emil",
+    "用途:动效"
   ],
   "source": {
     "type": "git",

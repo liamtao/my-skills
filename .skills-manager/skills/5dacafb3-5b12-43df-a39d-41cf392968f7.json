@@ -5,7 +5,8 @@
   "path_key": "pr",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:PR说明"
   ],
   "source": {
     "type": "git",

@@ -4,7 +4,10 @@
   "path": "linear-delivery-comment",
   "path_key": "linear-delivery-comment",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:票据交付",
+    "项目:A2B2"
+  ],
   "source": {
     "type": "local",
     "ref": null,

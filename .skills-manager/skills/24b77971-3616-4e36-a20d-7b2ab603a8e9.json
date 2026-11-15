@@ -4,7 +4,10 @@
   "path": "scaffold-exercises",
   "path_key": "scaffold-exercises",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "来源:MattPocock",
+    "用途:教学"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/mattpocock/skills",

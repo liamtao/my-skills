@@ -4,7 +4,9 @@
   "path": "reverse-engineer-anything",
   "path_key": "reverse-engineer-anything",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:逆向工程"
+  ],
   "source": {
     "type": "import",
     "ref": null,

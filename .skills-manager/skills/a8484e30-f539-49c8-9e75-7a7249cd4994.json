@@ -4,7 +4,10 @@
   "path": "nx2apple-import-game",
   "path_key": "nx2apple-import-game",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:游戏导入",
+    "项目:NX2Apple"
+  ],
   "source": {
     "type": "import",
     "ref": null,

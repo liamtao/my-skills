@@ -5,7 +5,8 @@
   "path_key": "retro",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:复盘"
   ],
   "source": {
     "type": "git",

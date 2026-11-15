@@ -4,7 +4,10 @@
   "path": "migrate-to-shoehorn",
   "path_key": "migrate-to-shoehorn",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "来源:MattPocock",
+    "用途:测试"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/mattpocock/skills",

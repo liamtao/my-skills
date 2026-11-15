@@ -4,7 +4,10 @@
   "path": "setup-ts-deep-modules",
   "path_key": "setup-ts-deep-modules",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "来源:MattPocock",
+    "用途:架构设计"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/mattpocock/skills",

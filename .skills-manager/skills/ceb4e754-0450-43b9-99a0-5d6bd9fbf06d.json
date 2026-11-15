@@ -5,7 +5,8 @@
   "path_key": "gsap-core",
   "enabled": true,
   "tags": [
-    "gasp"
+    "技术:GSAP",
+    "用途:动效"
   ],
   "source": {
     "type": "local",

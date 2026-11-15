@@ -5,7 +5,8 @@
   "path_key": "codebase-design",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:架构设计"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,8 @@
   "path_key": "research",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:研究"
   ],
   "source": {
     "type": "git",

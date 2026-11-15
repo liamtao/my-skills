@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "bd3a601c-7da9-468a-817a-ec663c1c17da",
+  "name": "项目 · UI设计",
+  "description": "普通UI项目默认入口；动效、组件专项按需追加。",
+  "icon": null,
+  "sort_order": 999
+}

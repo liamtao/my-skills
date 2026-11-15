@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "e3fa8a51-f5ac-471a-bd14-b5aee7a51431",
+  "name": "项目 · 架构梳理",
+  "description": "依赖全局工程基础中的codebase-design；分析、讨论和领域建模。",
+  "icon": null,
+  "sort_order": 999
+}

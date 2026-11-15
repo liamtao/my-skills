@@ -4,7 +4,9 @@
   "path": "oil-studio",
   "path_key": "oil-studio",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:录屏制作"
+  ],
   "source": {
     "type": "import",
     "ref": null,

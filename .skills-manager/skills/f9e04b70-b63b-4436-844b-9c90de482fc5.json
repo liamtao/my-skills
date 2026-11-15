@@ -5,7 +5,8 @@
   "path_key": "code-review",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:审查"
   ],
   "source": {
     "type": "git",

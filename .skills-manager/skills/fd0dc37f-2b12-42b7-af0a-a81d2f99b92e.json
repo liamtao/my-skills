@@ -4,7 +4,10 @@
   "path": "setup-pre-commit",
   "path_key": "setup-pre-commit",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "来源:MattPocock",
+    "用途:工程流程"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/mattpocock/skills",

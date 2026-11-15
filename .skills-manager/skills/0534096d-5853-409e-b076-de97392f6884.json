@@ -4,7 +4,10 @@
   "path": "quant-framework-upgrade",
   "path_key": "quant-framework-upgrade",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:框架升级",
+    "项目:XBX"
+  ],
   "source": {
     "type": "import",
     "ref": null,

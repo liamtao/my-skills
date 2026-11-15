@@ -5,7 +5,8 @@
   "path_key": "writing-for-agents",
   "enabled": true,
   "tags": [
-    "Mattpocock"
+    "来源:MattPocock",
+    "用途:Agent配置"
   ],
   "source": {
     "type": "git",

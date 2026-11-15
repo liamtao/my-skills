@@ -4,7 +4,9 @@
   "path": "z4-connect",
   "path_key": "z4-connect",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "用途:存储访问"
+  ],
   "source": {
     "type": "import",
     "ref": null,

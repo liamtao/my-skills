@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "a8660e8b-a087-493d-955c-8d44e320c5ef",
+  "name": "项目 · A2B2票据交付",
+  "description": "A2B2建票、PR归档及交付记录。",
+  "icon": null,
+  "sort_order": 999
+}
