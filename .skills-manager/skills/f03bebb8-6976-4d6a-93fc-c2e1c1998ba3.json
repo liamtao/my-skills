@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "skill_id": "f03bebb8-6976-4d6a-93fc-c2e1c1998ba3",
+  "path": "ben-oil-ui-mobbin",
+  "path_key": "ben-oil-ui-mobbin",
+  "enabled": true,
+  "tags": [
+    "来源:Ben",
+    "用途:UI设计",
+    "用途:信息检索"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
