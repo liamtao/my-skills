@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "skill_id": "f284db78-c9f9-4669-afff-6e6e4e2cb1e3",
+  "path": "oil-tone",
+  "path_key": "oil-tone",
+  "enabled": true,
+  "tags": [
+    "来源:oil-oil",
+    "用途:写作"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/oil-oil/oil-tone/tree/main/skills/oil-tone",
+    "subpath": "skills/oil-tone",
+    "branch": "main"
+  }
+}
