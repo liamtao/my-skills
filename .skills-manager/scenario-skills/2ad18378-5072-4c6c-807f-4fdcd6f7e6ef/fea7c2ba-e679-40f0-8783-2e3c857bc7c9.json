@@ -2,6 +2,12 @@
   "schema_version": 1,
   "scenario_id": "2ad18378-5072-4c6c-807f-4fdcd6f7e6ef",
   "skill_id": "fea7c2ba-e679-40f0-8783-2e3c857bc7c9",
-  "sort_order": 2,
-  "tools": {}
+  "sort_order": 1,
+  "tools": {
+    "antigravity": true,
+    "antigravity_cli": true,
+    "codebuddy": true,
+    "codex": true,
+    "workbuddy_overseas": true
+  }
 }
