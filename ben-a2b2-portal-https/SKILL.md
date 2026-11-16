@@ -1,6 +1,6 @@
 ---
 name: ben-a2b2-portal-https
-description: "为 Ben 启动或维护本机 A2B2 Portal HTTPS 测试代理与 iPhone 证书安装入口。仅在明确要求 HTTPS 测试时使用；普通 Portal 启动沿用团队 a2b2-start-dev。"
+description: "为 Ben 启动或维护本机 A2B2 Portal HTTPS 测试代理与 iPhone 证书安装入口。仅在明确要求 HTTPS 测试时使用；普通 Portal 启动沿用个人 ben-a2b2-start-dev。"
 ---
 
 # Optional Portal HTTPS testing
@@ -9,7 +9,7 @@ Use this workflow only after the user explicitly requests HTTPS testing. Keep th
 
 ## Inspect and start
 
-1. Start or reuse the intended checkout's Portal on `3000` using the repository’s `.agents/skills/a2b2-start-dev/SKILL.md`. Read `~/.config/a2b2/portal-https/start.sh` and `Caddyfile`. Inspect `3443` (HTTPS) and `3080` (certificate installation) with `lsof`, process arguments and ownership before starting anything. Reuse a healthy matching proxy; preserve unrelated listeners.
+1. Start or reuse the intended checkout's Portal on `3000` using the personal `.agents/skills/ben-a2b2-start-dev/SKILL.md` Portal-only route (which delegates to the team skill). Read `~/.config/a2b2/portal-https/start.sh` and `Caddyfile`. Inspect `3443` (HTTPS) and `3080` (certificate installation) with `lsof`, process arguments and ownership before starting anything. Reuse a healthy matching proxy; preserve unrelated listeners.
 2. Discover the current LAN IPv4 and compare it with the Caddy site addresses, bind addresses, certificate SANs and installation-page links. Do not reuse a remembered IP. If the IP changed, update those local settings and reissue the server certificate with the existing CA in `~/.config/a2b2/portal-https/ca/`; keep that CA so the iPhone's existing trust remains valid. Restart only the matching HTTPS proxy when its configuration needs to change.
 3. If the local setup is missing, prepare it within the authorized HTTPS request using `mkcert` and Caddy. Keep the CA and server keys outside the repository and public download directory. Configure TLS on `3443` to proxy `127.0.0.1:3000`, including WebSocket upgrades and streaming. Serve only the installation page and public root certificate/profile on `3080`. Preserve the Portal backend, HTTP port and normal startup commands.
 4. Validate the actual configuration, then run the entry in a managed long-running terminal session when no matching proxy is running:

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "skill_id": "2b0ca47c-df76-4581-9bcf-5a9b7fe7eb9a",
+  "path": "team-mode",
+  "path_key": "team-mode",
+  "enabled": true,
+  "tags": [
+    "来源:oil-oil",
+    "用途:Agent配置"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/oil-oil/codex-team-mode/tree/main/skills/team-mode",
+    "subpath": "skills/team-mode",
+    "branch": "main"
+  }
+}

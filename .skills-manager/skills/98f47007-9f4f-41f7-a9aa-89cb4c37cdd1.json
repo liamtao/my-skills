@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "skill_id": "98f47007-9f4f-41f7-a9aa-89cb4c37cdd1",
+  "path": "ben-a2b2-start-dev",
+  "path_key": "ben-a2b2-start-dev",
+  "enabled": true,
+  "tags": [
+    "来源:Ben",
+    "用途:开发环境",
+    "项目:A2B2"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

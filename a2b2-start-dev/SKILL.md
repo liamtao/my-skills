@@ -1,7 +1,11 @@
 ---
 name: a2b2-start-dev
-description: "Start or reuse A2B2 local development services when asked to 开启 iOS 模拟器、Mobile、Metro、Portal 服务、启动官网 or Marketing. iOS includes Metro. Named targets start only those surfaces; with no target named, it starts iOS and Portal. Portal HTTPS testing is optional and requires an explicit HTTPS request."
+description: "历史参考副本，不作为 Ben 本机启动入口；当前入口见项目 ben-a2b2-start-dev，团队规范以仓库 a2b2-start-dev 为准。"
 ---
+
+# Archived local copy
+
+For current Ben-local startup, read the project’s `.agents/skills/ben-a2b2-start-dev/SKILL.md` and use `/Users/ben/.config/a2b2/dev-tools/dev` for combined startup. The remaining text is historical reference; current team rules live in the checkout’s `.agents/skills/a2b2-start-dev/SKILL.md`.
 
 # Start A2B2 development
 
@@ -40,7 +44,7 @@ Run from `apps/portal` when no suitable service exists:
 pnpm dev --host 0.0.0.0
 ```
 
-Portal defaults to LAN listening (`0.0.0.0:3000`). Keep **`http://localhost:3000/`** for Mac navigation and deliver `http://<current-LAN-IPv4>:3000/` for phones on the same LAN. Discover the active interface/address rather than storing a fixed IP. `pnpm dev:local` and Alfred’s “A2B2 开发环境” workflow use this default; `A2B2_DEV_HOST=localhost pnpm dev:local` opts into loopback only. A healthy loopback-only listener is not LAN-ready. When LAN is requested, check the process owner before restarting the intended checkout’s managed Portal, preserving other services where possible.
+Portal defaults to LAN listening (`0.0.0.0:3000`). Keep **`http://localhost:3000/`** for Mac navigation and deliver `http://<current-LAN-IPv4>:3000/` for phones on the same LAN. Discover the active interface/address rather than storing a fixed IP. Ben’s migrated local entry and Alfred’s “A2B2 开发环境” workflow use this default; `A2B2_DEV_HOST=localhost /Users/ben/.config/a2b2/dev-tools/dev` opts into loopback only. A healthy loopback-only listener is not LAN-ready. When LAN is requested, check the process owner before restarting the intended checkout’s managed Portal, preserving other services where possible.
 
 Vite dev mode proxies `/api/`, `/connect/v1/`, and the configured `/agent-service/` upstreams through the frontend origin. It retains the selected `.env.local` backend (AWS SIT is `https://api-sit.a2b2.ai`) and removes the browser Origin on the server-to-server hop. Release builds retain their configured public API URLs. No remote CORS change is needed. The dev-only UUID compatibility shim uses `crypto.getRandomValues` for HTTP LAN browsers.
 
