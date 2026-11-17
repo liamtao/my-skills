@@ -40,6 +40,8 @@ description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。根据实际 
 
 复用本次范围和修订仍适用的已完成步骤与授权。遇到检查失败或必需覆盖缺口，按团队规则停在对应阶段；不将失败描述成成功，也不进入 Linear 的交付写入。创建 PR 不授权合并或部署。
 
+需要在浏览器中打开 GitHub、编辑 PR 或上传验收截图／录屏时，使用 ego-browser，并明确选择 Ego Lite 的 `Liam` profile。按当前 ego-browser 指南查询 profile ID 后创建对应 TaskSpace；现有 GitHub 连接器足够时继续优先使用连接器。
+
 独立读回 PR，核对 URL、base、head SHA、范围及 draft／ready 状态。已有 PR 时更新或复用该 PR，避免重复创建。超时或结果不明确时先查询实际结果，再决定是否重试。
 
 完成条件：已验证本次 PR 的实际结果，或已报告具体阻塞；区分本地验证、CI、合并和部署证据。
