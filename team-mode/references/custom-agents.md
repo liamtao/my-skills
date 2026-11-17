@@ -10,7 +10,7 @@ Copy the templates from the repository's `agents/` directory into `~/.codex/agen
 | --- | --- | --- | --- | --- |
 | `Explorer` | `gpt-6-luna` | `medium` | `fast` | Locate primary files in a large codebase when the parent requests it. |
 | `Executor` | `gpt-6-luna` | `xhigh` | inherited | Complete a bounded implementation. |
-| `Reviewer` | `gpt-6.1-sol` | `high` | inherited | Review a stable result and save a Markdown report when useful. |
+| `Reviewer` | `gpt-6.2-sol` | `high` | inherited | Review a stable result and save a Markdown report when useful. |
 | `ExpertAdvisor` | selected per consultation | selected per consultation | inherited | Investigate a complex decision or carry out assigned modeling or automation. |
 
 `ExpertAdvisor.toml` deliberately omits `model` and `model_reasoning_effort`. Choose them at spawn time. Current Codex applies a custom profile's fixed model and effort *after* resolving explicit spawn values, so a fixed profile wins over a conflicting spawn request. Other models and roles may be configured; Team Mode does not impose a global model allowlist. See the [Codex subagent documentation](https://learn.chatgpt.com/docs/agent-configuration/subagents#custom-agents).

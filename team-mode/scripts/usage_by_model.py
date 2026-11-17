@@ -14,10 +14,11 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-RATE_DATE = "2026-10-01"
+RATE_DATE = "2026-11-18"
 RATE_SOURCE = "https://learn.chatgpt.com/docs/pricing"
 RATES = {
     "gpt-6-astra": {"input": 250.0, "cached": 25.0, "output": 1250.0},
+    "gpt-6.2-sol": {"input": 50.0, "cached": 2.5, "output": 250.0},
     "gpt-6.1-sol": {"input": 50.0, "cached": 2.5, "output": 250.0},
     "gpt-6-luna": {"input": 2.5, "cached": 0.25, "output": 12.5},
     # 保留旧任务的模型识别，使用同一官方费率表中的当前 Standard 费率。
