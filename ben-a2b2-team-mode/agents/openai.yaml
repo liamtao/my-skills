@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ben’s A2B2 Team Mode"
+  short_description: "Route A2B2 tasks to focused Codex subagents"
+  default_prompt: "Use $ben-a2b2-team-mode to delegate independent A2B2 work and verify the returned results."

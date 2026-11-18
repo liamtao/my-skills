@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "skill_id": "4b44a840-cb83-486c-af78-4814bad7000f",
+  "path": "ben-a2b2-team-mode",
+  "path_key": "ben-a2b2-team-mode",
+  "enabled": true,
+  "tags": [
+    "技术:Codex",
+    "来源:Ben",
+    "用途:Agent配置",
+    "项目:A2B2"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
