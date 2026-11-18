@@ -20,9 +20,9 @@ The script fills missing roles, upgrades recognized versions, and reports any lo
 | Role | Routing | Assignment |
 | --- | --- | --- |
 | `Explorer` | Profile fixes `gpt-6-luna` / `high` | Locate entry points, call paths and tests in a large codebase. Read [Explore](references/explore.md). |
-| `Executor` | Pass `gpt-6.2-sol` / `high` for ordinary implementation. Pass `gpt-6.1-terra` / `low` for acceptance based on visible UI states or screenshots. | Give one agent clear write ownership or a bounded acceptance scenario. Read [interactive testing](references/interactive-testing.md) when the result depends on real UI state. |
+| `Executor` | Pass `gpt-6.2-sol` / `high` for ordinary implementation. Pass `gpt-6.1-terra` / `medium` when visual inspection or screen interaction is central to the task. | Give one agent clear write ownership or a bounded acceptance scenario. Read [interactive testing](references/interactive-testing.md) when the result depends on real UI state. |
 | `Reviewer` | Profile fixes `gpt-6.2-sol` / `high` | Independently review a stable result against its intended behavior and report material findings. |
-| `ExpertAdvisor` | Pass `gpt-6.2-astra` / `low` for a focused consultation or `high` for difficult tradeoffs and recurring failures. | Ask for an independent judgment, model, or bounded investigation when a second line of reasoning has value. The main agent may also be using Astra. |
+| `ExpertAdvisor` | Pass `gpt-6.2-astra` / `medium` by default for a focused consultation or `high` for difficult tradeoffs and recurring failures. | Ask for an independent judgment, model, or bounded investigation when a second line of reasoning has value. The main agent may also be using Astra. |
 
 Sol 6.2 / high is the usual parent setting. Astra 6.2 is suitable for work centered on complex product or interaction decisions. Reserve Luna for bounded, repeatable work. The installed Explorer covers code lookup. Check the client model list before selecting a model for other work.
 
