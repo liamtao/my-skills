@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "skill_id": "30f12870-fc44-4437-88f7-340177aeb19a",
+  "path": "ben-a2b2-parallel-review",
+  "path_key": "ben-a2b2-parallel-review",
+  "enabled": true,
+  "tags": [
+    "来源:Ben",
+    "用途:工程流程",
+    "项目:A2B2"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

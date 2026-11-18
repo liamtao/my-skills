@@ -18,20 +18,20 @@ Use these defaults unless Ben explicitly overrides them for the current batch or
 | Parent for iOS or Portal Mobile work | ENG-660. Include a shared Web/Mobile change here when its grouped outcome includes iOS or Portal Mobile. Resolve a suitable parent separately for other work. |
 | Assignee for all records | Ben, verified through ben@a2b2.ai. |
 | Sprint for all records | Proactively ask Ben to choose the current or next sprint for each batch, showing the owning team's live cycle names and dates. Reuse an explicit choice already given for that batch. |
-| State | Preserve existing ticket status. For new tickets, omit the state field and use the team's creation default unless Ben explicitly requests a state. |
+| State | For new tickets created from a PR, propose **Ready for Testing** for the current sprint and **In Progress** for the next sprint. An explicit state for that ticket takes precedence. Preserve the status of existing tickets. |
 
-Keep the parent and assignee defaults without asking again; obtain the sprint choice for the batch. A sprint choice does not authorize a status change. Change Linear status only when Ben explicitly requests the status change for the named ticket(s), including any parent tickets or subtickets. Permission to implement, test, commit, push, upload, create a PR, deploy, invoke this skill or approve ticket content does not authorize a status change. These defaults do not authorize changes to the parent itself or other tickets, bypass batch confirmation or establish that testing has passed.
+Keep the parent and assignee defaults without asking again; obtain the sprint choice for the batch. The sprint sets the proposed initial state of new PR tickets. Write that state only after Ben approves the concrete draft showing it. Changing an existing ticket, parent or subissue status requires an explicit request naming the affected records. These defaults do not authorize changes to the parent itself or other tickets, bypass batch confirmation or establish that testing has passed.
 
 ## 1. Resolve the PR and batch settings
 
 - Use a supplied PR URL or number. For “this PR”, use the PR established in the current chat and verify it through GitHub. Ask only if multiple PRs remain plausible.
 - Discover the available GitHub and Linear tools and their current schemas. Prefer connectors; local Git can supplement missing diff/history context when the checkout matches the PR revision. Report unavailable capabilities without treating a tool failure as an empty result.
 - Read the PR title, description, current base/head SHA, all changed-file pages and complete patches. Use the actual PR base, including a stacked PR's parent branch, rather than the whole local branch or an assumed main base. Inspect commit history to explain iterations; describe the resulting PR behavior, not reverted experiments as delivered features. Account for fixes, shared cross-app changes and supporting configuration. Flag unavailable or truncated evidence before claiming full coverage.
-- Resolve parent, team, assignee and cycle using explicit instructions for this batch first, then Ben's defaults. Resolve a state only if Ben explicitly requested it. Read the parent and its children. Keep parent and project separate.
+- Resolve parent, team, assignee and cycle using explicit instructions for this batch first, then Ben's defaults. For each create, resolve the proposed initial state by name in the owning team. If the chosen sprint is outside the mapping and no state was specified, or the team has no unique match, ask for the initial state before confirming that draft. Read the parent and its children. Keep parent and project separate.
 - Resolve people through Linear. “Me” in Ben's request means Ben, not necessarily the connector's authenticated user; verify the account, using ben@a2b2.ai when appropriate.
 - Query the owning team's current and next cycles, verify their dates and ask: “这批 ticket 放在当前 Sprint（名称、日期），还是下个 Sprint（名称、日期）？” Ask early while continuing independent PR analysis. If Ben already chose for this batch, use that answer without asking again. Keep the cycle decision pending until answered; do not select an option after a timeout. If either cycle cannot be established uniquely, report the gap instead of guessing. Resolve the chosen cycle by UUID, not internal number; displayed sprint names can differ from cycle numbers.
 - Ask together for essential missing settings while continuing independent PR analysis. Offer Engineering as the team for A2B2 engineering work. Present optional unset fields as unset; avoid inventing priority or due dates.
-- Preserve ticket status unless Ben explicitly requests a change. A PR's draft, merged or deployed state and a chosen sprint do not authorize a status transition. Show parent changes for reused tickets in the proposal.
+- Preserve existing ticket status unless Ben explicitly requests a transition for that ticket. Show parent changes for reused tickets in the proposal.
 
 Completion: the PR revision and effective batch settings are resolved or their specific gaps are visible. Resolve IDs from live Linear data rather than caching values from a previous run.
 
@@ -58,7 +58,7 @@ Completion: every PR change group maps to a proposed record or an explicit exclu
 
 ## 3. Preview the complete batch
 
-Show the create/update counts, common metadata and every proposed English title and full body. For existing tickets, show exactly what will be appended or changed, including parent, cycle, assignee and state. Keep the coverage map compact when several groups share a ticket.
+Show the create/update counts, common metadata and every proposed English title and full body. For every create, show the chosen sprint and proposed initial status together. For existing tickets, show exactly what will be appended or changed, including parent, cycle, assignee and state. Keep the coverage map compact when several groups share a ticket.
 
 Use the ticket-writing skill's Background / Why, Current Behavior, acceptance criteria and Stakeholders structure. Add PR-specific evidence:
 
@@ -74,11 +74,11 @@ Wait for confirmation of this concrete batch before writes. A request to create 
 
 ## 4. Apply the approved plan
 
-Re-read existing tickets immediately before updating and check for overlapping edits. Recheck the chosen cycle's dates before writes. If a cycle boundary changed its current/next relationship since approval, reconfirm the concrete cycle instead of silently moving tickets. Preserve status unless Ben explicitly requested a change. If the PR head changed since preview, inspect the delta; obtain confirmation for added or materially changed scope.
+Re-read existing tickets immediately before updating and check for overlapping edits. Recheck the chosen cycle's dates before writes. If the cycle crossed a boundary, resolve the sprint and proposed initial state again and show the revised fields for confirmation before creating tickets. Preserve existing ticket status unless Ben explicitly requested a change. If the PR head changed since preview, inspect the delta; obtain confirmation for added or materially changed scope.
 
 - Use Linear's current create/update operation and explicit resolved IDs. Attach a link to the PR on each record. Use real newlines in Markdown.
 - Create only approved new records. For reuse, prefer a narrow append or anchored patch and apply only the approved metadata changes. Preserve unrelated fields and media.
-- Omit state from create/update requests unless Ben explicitly requested it. Apply an authorized status change only to the named records; preserve other children and the parent's status.
+- On create, include the approved initial state ID for the owning team. On update, omit state unless Ben explicitly requested that transition for the named record. Preserve other children and the parent's status.
 - Process writes sequentially and record each returned issue ID, action and PR association in the available work-state tracker before continuing.
 - After a timeout or ambiguous failure, search/read the affected record and PR association before retrying. Resume from confirmed successes. If the outcome is still ambiguous, stop that write and report it; do not retry a create blindly.
 
