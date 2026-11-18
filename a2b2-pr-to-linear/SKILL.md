@@ -22,6 +22,8 @@ Use these defaults unless Ben explicitly overrides them for the current batch or
 
 Keep the parent and assignee defaults without asking again; obtain the sprint choice for the batch. The sprint sets the proposed initial state of new PR tickets. Write that state only after Ben approves the concrete draft showing it. Changing an existing ticket, parent or subissue status requires an explicit request naming the affected records. These defaults do not authorize changes to the parent itself or other tickets, bypass batch confirmation or establish that testing has passed.
 
+When the parallel development coordinator requests a draft before opening the PR, use the intended base/head diff and evidence for a read-only preview. Apply the same grouping, duplicate search, sprint, state and full-body rules below. Mark the PR URL and any pending gate results for completion from the submitted PR. The coordinator can present that concrete batch together with the final design decision. After submission, verify the actual PR diff, evidence, duplicates, cycle and records. Reuse approval for the same batch and fill verified links/results. Reconfirm any material change to scope, proposed action, fields or verification outcome before writing. Ordinary PR-to-Linear requests continue from the submitted PR.
+
 ## 1. Resolve the PR and batch settings
 
 - Use a supplied PR URL or number. For “this PR”, use the PR established in the current chat and verify it through GitHub. Ask only if multiple PRs remain plausible.
