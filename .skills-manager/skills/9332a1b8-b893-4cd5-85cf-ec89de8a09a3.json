@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "skill_id": "30f12870-fc44-4437-88f7-340177aeb19a",
-  "path": "ben-a2b2-parallel-review",
-  "path_key": "ben-a2b2-parallel-review",
+  "skill_id": "9332a1b8-b893-4cd5-85cf-ec89de8a09a3",
+  "path": "ben-a2b2-parallel-development",
+  "path_key": "ben-a2b2-parallel-development",
   "enabled": true,
   "tags": [
     "来源:Ben",

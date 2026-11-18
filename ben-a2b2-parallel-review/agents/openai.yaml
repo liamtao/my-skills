@@ -1,4 +1,0 @@
-interface:
-  display_name: "A2B2 并行开发与设计验收"
-  short_description: "协调多个 feature 的 worktree、逐端设计验收和 PR 交付范围"
-  default_prompt: "用 $ben-a2b2-parallel-review 协调这批 feature 的并行开发、设计验收和 PR 交付。"
