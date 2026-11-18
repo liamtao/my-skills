@@ -1,6 +1,8 @@
 # A2B2 custom agents
 
-The local source of the skill holds four templates in [assets/codex-agents](../assets/codex-agents). Copy the corresponding files to the A2B2 checkout's `.codex/agents/` after comparing them with its existing profiles. Skills Manager deploys the skill files into `.agents/skills/`. Codex loads the role files from `.codex/agents/`.
+Skills Manager deploys the skill into `.agents/skills/`. The [sync script](../scripts/sync_agents.py) installs its [four templates](../assets/codex-agents) into the target checkout's `.codex/agents/` before the first dispatch. To run it directly, pass the project root with `--project`.
+
+The script copies missing profiles and upgrades files whose full contents match a released template. Matching current profiles are skipped. It preserves custom files and shows their differences, including same-role profiles stored under another filename. When releasing a changed template, add its SHA-256 digest to [the released profile list](../assets/codex-agents/known-versions.json) and retain the old digests. An unchanged copy of either release then remains eligible for a future update.
 
 Codex resolves model and reasoning effort from the role file, explicit spawn arguments, `[agents]` defaults, then the parent. When an explicit or global model selection has no reasoning effort, Codex uses the model's default effort. Executor and ExpertAdvisor leave both settings to dispatch. Explorer and Reviewer pin both values. Service tier and sandbox policy follow the parent. Scope read-only assignments through the brief and role instructions.
 
