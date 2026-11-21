@@ -1,6 +1,6 @@
 ---
 name: ben-a2b2-submit-pr
-description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。根据实际 PR 范围为符合条件的本地分支命名，调用团队 a2b2-pre-push-checks 完成提交，再默认调用 a2b2-pr-to-linear 生成同步草稿，确认后写入 Linear。
+description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门禁提交，明确要求「链式提交」时逐层提交并连接 GitHub stack，默认生成 Linear 同步草稿供确认。
 ---
 
 # Ben 的 A2B2 PR 入口
@@ -9,6 +9,7 @@ description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。根据实际 
 
 ## 1. 读取依赖并确定范围
 
+- Ben 明确要求「链式提交」或「提交为 GitHub stack」时，按[链式提交](references/stacked-pr.md)确定范围，使用团队的「逐层提交 PR」策略。普通提交沿用现有策略选择和提交步骤。
 - 以当前选定 checkout 的 Git 根目录为准，遵循该目录的 `AGENTS.md` 和本地 `AGENTS.override.md`。
 - 在分支操作或提交准备前，读取该 checkout 的 `.agents/skills/a2b2-pre-push-checks/SKILL.md` 及其 `references/pull-request.md`。始终使用仓库当前版本，保持团队文件原样。
 - 找到并读取已安装的 `a2b2-pr-to-linear`；优先使用项目 `.agents/skills/a2b2-pr-to-linear/SKILL.md`，也可通过 Skills Manager 解析中央库位置。后续按需读取它要求的依赖。缺失时明确报告，不自行复制或改写替代流程。
@@ -44,12 +45,15 @@ description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。根据实际 
 
 独立读回 PR，核对 URL、base、head SHA、范围及 draft／ready 状态。已有 PR 时更新或复用该 PR，避免重复创建。超时或结果不明确时先查询实际结果，再决定是否重试。
 
+链式提交逐层完成本节后，按[连接 GitHub stack](references/stacked-pr.md#连接-github-stack)创建、扩展或复用原生 stack，并读回确认。连接结果与 PR 提交结果分别汇报。
+
 完成条件：已验证本次 PR 的实际结果，或已报告具体阻塞；区分本地验证、CI、合并和部署证据。
 
 ## 4. 默认进入 PR → Linear 草稿及确认
 
 PR 成功创建或更新并读回后，自动调用 `a2b2-pr-to-linear`，传递已核验的 PR URL、实际 base/head SHA、验证结果和本次已明确的 Linear 选择。下游以该 PR 实际 diff 为准做覆盖分析、查重和 issue 草稿，不使用整个分支相对 main 的改动替代 stacked PR 范围。
 
+- 链式提交默认以指定目标分支的 PR 生成草稿。Ben 明确指定其他层时，按对应 PR 分别核对范围和查重。
 - 默认走 issue 创建／更新，不同时调用 `linear-delivery-comment`。Ben 明确改为只发交付评论时，再遵循该技能的独立确认流程。
 - 由 `a2b2-pr-to-linear` 处理 parent、assignee、实时 Sprint 选择、完整草稿、查重和读回规则；复用同批次已有选择。没有 Sprint 答案时继续保持待选择。
 - **任何 Linear 写入前，必须先展示完整拟创建／更新批次并取得 Ben 对该具体批次的明确确认。** “提交 PR”、调用本入口或创建此技能均不算写入批准；等待期间可继续只读分析。已确认且范围未变的同一批次不重复索取批准。
@@ -62,3 +66,5 @@ PR 成功创建或更新并读回后，自动调用 `a2b2-pr-to-linear`，传递
 ## 5. 汇报
 
 简要列出分支名及是否改名、PR 链接、门禁与验收结果及缺口，以及 Linear 当前是待选择、待确认、已保存还是失败。已保存时给出 issue 链接；未保存时不声称同步完成。
+
+链式提交另报 stack 编号、各层 PR 的顺序和 base，以及连接结果。已建 PR 而连接待完成时，保留 PR 链接供下次恢复。

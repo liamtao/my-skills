@@ -3,6 +3,43 @@
 Read this before modifying a chain. Use the repository's actual PR evidence and
 Git graph; the commands below are templates, not a bulk branch-cleanup script.
 
+## Reconcile a GitHub-native stack
+
+When a lower PR lands in a native stack, GitHub retargets and rebases the next
+open PR onto the stack base. Read the stack and each affected PR again after
+fetching. Check the direct base, head SHA against the fetched branch, and
+ancestry to the intended parent for every surviving layer. Compare published
+layers against the pre-fetch heads and verified old boundaries. Record what
+GitHub completed and what remains pending.
+[GitHub merge behavior](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/merging-stacked-pull-requests#merging-from-the-bottom-up)
+
+- For a clean eligible local branch at the verified remote head, refresh its
+  local boundary if needed. Fast-forward an eligible branch that is behind
+  the verified head and has no local-only work.
+- A server rebase can make previously synchronized refs diverge. Adopt the
+  new remote head when the local tip equals the verified old published tip,
+  or its covered ancestor within the old layer, and `git range-diff` plus the
+  layer diffs account for the original commits and their replacements. Save
+  the original refs and boundaries before moving the branch. Keep worktree
+  occupancy checks in force. For the current clean branch, temporarily detach
+  before moving the ref with `git update-ref <ref> <new> <expected-old>`, then
+  switch back. Recheck the original tip and occupancy immediately before the
+  update. Refresh dependency metadata after verifying the new tip and base.
+- With local-only commits or uncertain equivalence, preserve the affected
+  branch and report the pending divergence. Restack eligible unpublished
+  descendants using the verified pre-rebase boundary and new parent tip.
+- If a published layer still needs a server rebase or retarget, report it as
+  pending. A separately requested local conflict repair can use the manual
+  replay procedure with verified boundaries. A GitHub **Rebase stack** action
+  rewrites published heads and needs authorization covering the affected
+  branches and the applicable team workflow.
+
+When GitHub has already retargeted and rebased a PR, that result satisfies the
+retarget and rebase steps in the team's dependent PR guidance. Recheck the
+resulting revision against the applicable team checks before a later push,
+ready transition or merge. Ordinary dependent PRs still follow the manual
+procedure when their parent lands.
+
 ## Persist the dependency boundary
 
 For branches created or confidently adopted by this skill, store two local Git
@@ -20,7 +57,7 @@ runs, validate them against the graph and PR relationships, and refresh them onl
 after a verified migration. Metadata lives in this checkout's Git configuration,
 not in tracked product files. It is not distributed by clone or push.
 
-After a local-only migration, a remote PR can still name the deleted old parent.
+After a manual local-only migration, a remote PR can still name the deleted old parent.
 Use the verified local metadata and backup map to recognize this pending remote
 transition on the next run. Do not reconstruct the old dependency from the stale
 PR base or replay its commits. Report the needed remote retarget separately.
@@ -45,12 +82,16 @@ Keep them until the user requests their cleanup.
 
 A local branch is eligible for cleanup when all of these hold:
 
-1. A PR from the correct repository/head is confirmed merged, with a recorded
+1. A PR from the correct repository is confirmed merged, with a recorded
    landed commit reachable from fresh `origin/main`. For indirect landing through
    another base, prove that chain too; a PR merged elsewhere alone is insufficient.
-2. The local tip equals or is an ancestor of the PR's verified head at merge time.
-   A descendant with later commits is only partially landed. Reused branch names
-   require checking every relevant PR and the exact commit range.
+2. For a direct PR, the local tip equals or is an ancestor of its verified head
+   at merge time. A descendant with later commits is only partially landed.
+   For a branch carried by a consolidated PR under different commit IDs, use the
+   verified local base to enumerate the entire branch-only range. Match every
+   commit by patch content, in order, to commits in that PR's merged head and
+   confirm the resulting changes in the landed diff. Preserve the branch if any
+   commit or effect is unaccounted for, even if the PR title matches.
 3. There is no newer open PR or unclassified work on that local branch. A later
    revert in main remains an intentional main change; do not reapply the old PR.
 
@@ -121,13 +162,6 @@ parents. If tips and boundaries are already current, leave them unchanged.
 Capture all original boundaries before the first rebase; using an already
 rebased parent's new SHA as the exclusion boundary can replay old parent commits.
 
-If GitHub's native stack manager already restacked remote branches, inspect those
-tips before rewriting locally. Fast-forward clean, behind-only local branches
-where the verified remote state is authoritative, then reconcile metadata. Keep
-divergent local/remote histories intact until local-only work and boundaries are
-understood. Do not combine server and manual restacks blindly or push stale tips
-over a server-managed result.
-
 For every moved layer:
 
 - Verify the new parent is an ancestor of the child.
@@ -150,24 +184,37 @@ After the entire affected chain verifies:
 
 1. Recheck that surviving descendants no longer depend on each deletion target
    and their metadata names the new parent. Keep any target whose child could not
-   be safely migrated, including a child checked out in another worktree.
-2. Recheck worktree occupancy, branch tip against the inspected SHA, landing
-   evidence and backup-ref existence immediately before deletion. Skip protected
-   branches, unknown ownership or any concurrent tip change.
+   be safely migrated.
+2. Recheck the branch tip against the inspected SHA, landing evidence, backup
+   refs and worktree occupancy. Skip protected branches, unknown ownership or
+   any concurrent tip change.
 3. If deleting the current branch, switch the clean worktree to the intended
    surviving branch. With no surviving topic, use clean local main only when it
    equals fresh main; otherwise detach at the fetched main SHA. Preserve a
    divergent local main. For `new`, create from that verified main baseline.
-4. Try `git branch -d -- <branch>`. Git may reject a valid squash/rebase landing
+4. For a fully landed branch checked out in a separate linked worktree in the
+   authorized cleanup scope, confirm the exact checkout and that it is clean
+   (including untracked files), unlocked, and free of ongoing Git operations.
+   Check ignored files separately and preserve local configuration before removal.
+   Preserve primary, shared or otherwise protected checkouts and worktrees in
+   active use. Archive Codex-managed worktrees through the Codex worktree tool
+   in their owning chat. If the current chat cannot archive the worktree, report
+   the ownership blocker and keep its branch.
+   For ordinary Git worktrees, run `git worktree remove -- <path>` without force.
+   If removal fails or the branch is still checked out, keep the branch and
+   report the blocker. An eligible worktree needs no extra confirmation.
+5. Try `git branch -d -- <branch>`. Git may reject a valid squash/rebase landing
    because the original commits are not ancestors of HEAD. When every proof above
    holds and the rejection is only the not-merged ancestry check, the user's
    requested local cleanup authorizes `git branch -D -- <branch>`. Never use
    forced deletion to bypass extra commits or worktree occupancy.
 
-Report branch deletion separately from retained backup refs. Remote branches and
-PR settings remain unchanged unless separately requested.
+Verify and report worktree removals and branch deletions separately, including
+backup refs and any saved local configuration. Remote branches and PR settings
+remain unchanged unless separately requested.
 
-Primary references, consulted 2026-11-09:
+Primary references, consulted 2026-11-19:
 [Git rebase](https://git-scm.com/docs/git-rebase),
 [GitHub pull request API](https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request),
-[GitHub stacked PRs](https://docs.github.com/en/pull-requests/reference/stacked-pull-requests).
+[GitHub stacked PRs](https://docs.github.com/en/pull-requests/reference/stacked-pull-requests),
+[GitHub CLI stack sync](https://docs.github.com/en/pull-requests/reference/stacked-prs-cli-commands#gh-stack-sync).

@@ -1,4 +1,4 @@
 interface:
   display_name: "A2B2 开发需求总管"
-  short_description: "为 A2B2 需求安排 worktree、派发开发和初审，并汇总验收入口"
-  default_prompt: "用 $ben-a2b2-parallel-development 协调这批 feature 的并行开发、设计验收和 PR 交付。"
+  short_description: "沿 A2B2 叠加分支协调开发与验收，按需隔离并行工作并逐分支提 PR"
+  default_prompt: "用 $ben-a2b2-parallel-development 协调这批 feature 的分支开发、设计验收和逐分支 PR 交付。"
