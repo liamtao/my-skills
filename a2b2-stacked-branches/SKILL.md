@@ -1,6 +1,6 @@
 ---
 name: a2b2-stacked-branches
-description: "Manage Ben's A2B2 stacked branches: inspect GitHub-native stacks, sync or restack local branches, verify merged PRs, clean up landed branches, or create a child branch. Use for branch maintenance and stacked PR delivery strategy, not implementation, releases or ordinary PR reviews."
+description: "Manage Ben's A2B2 stacked branches: inspect GitHub-native stacks, sync or restack local branches, verify merged PRs, clean up landed worktrees and branches, or create a child branch. Use for branch maintenance and stacked PR delivery strategy, not implementation, releases or ordinary PR reviews."
 ---
 
 # A2B2 stacked branches
@@ -17,6 +17,10 @@ Communicate in Chinese.
 - `整理` / `sync`, or a bare invocation: fetch, reconcile the selected local
   chain with verified remote results or local restacking, then delete its
   fully landed local branches and their eligible clean linked worktrees.
+- `清理 <PR or branch>` / `cleanup <PR or branch>`: verify the named targets and
+  run [post-merge cleanup](references/restacking.md#delete-fully-landed-local-branches-last)
+  for standalone PRs or landed stack layers. Defer a target if a surviving
+  dependent branch still needs to be restacked.
 - `新建 <topic>` / `new <topic>`: refresh and reconcile the parent chain, then
   create a named child branch and record its dependency.
 - `PR 策略` / PR preparation: inspect the ancestor chain and help choose separate
@@ -25,8 +29,8 @@ Communicate in Chinese.
 - Honor a narrower request, such as fetching main only. Creating or editing this
   skill does not invoke branch maintenance.
 
-Sync and new authorize the described local Git changes; check and PR strategy
-selection remain read-only. These modes do not authorize pushes, PR
+Sync, new and cleanup authorize the described local Git changes. Check and PR
+strategy selection remain read-only. These modes do not authorize pushes, PR
 creation/edits/merges, remote branch deletion, deployment,
 or Linear status changes. If those actions are requested too, use the applicable
 repository workflow and existing authorization. Use Git fetch and verified local
@@ -39,7 +43,8 @@ can create or update a remote stack.
    reference before branch selection. Inspect the Git root, active branch,
    status including untracked files, worktrees, remotes and local branch tips.
    Resolve the actual GitHub host/repository from the remote.
-2. Default scope is the active topic branch, its proven ancestors and descendants.
+2. Use the named PRs or branches when the user scopes cleanup explicitly.
+   Otherwise use the active topic branch, its proven ancestors and descendants.
    Other stacks can be audited when requested; do not rewrite or delete unrelated
    branches. If the active branch is `main` and no chain is identified, report
    candidates and ask which chain to maintain. Protect `main`, `sit`, `prod`,
@@ -168,6 +173,7 @@ Example requests:
 ```text
 $a2b2-stacked-branches 检查当前叠加链
 $a2b2-stacked-branches 整理当前叠加链
+$a2b2-stacked-branches 清理已合入的 PR #123，允许归档它对应的 Codex 聊天
 $a2b2-stacked-branches 新建 Mobile 字体优化分支，接着当前版本做
 $a2b2-stacked-branches 从 main 新建独立的 Portal 按钮间距分支
 ```

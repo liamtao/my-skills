@@ -188,33 +188,45 @@ After the entire affected chain verifies:
 2. Recheck the branch tip against the inspected SHA, landing evidence, backup
    refs and worktree occupancy. Skip protected branches, unknown ownership or
    any concurrent tip change.
-3. If deleting the current branch, switch the clean worktree to the intended
-   surviving branch. With no surviving topic, use clean local main only when it
-   equals fresh main; otherwise detach at the fetched main SHA. Preserve a
-   divergent local main. For `new`, create from that verified main baseline.
-4. For a fully landed branch checked out in a separate linked worktree in the
-   authorized cleanup scope, confirm the exact checkout and that it is clean
-   (including untracked files), unlocked, and free of ongoing Git operations.
-   Check ignored files separately and preserve local configuration before removal.
-   Preserve primary, shared or otherwise protected checkouts and worktrees in
-   active use. Archive Codex-managed worktrees through the Codex worktree tool
-   in their owning chat. If the current chat cannot archive the worktree, report
-   the ownership blocker and keep its branch.
-   For ordinary Git worktrees, run `git worktree remove -- <path>` without force.
-   If removal fails or the branch is still checked out, keep the branch and
-   report the blocker. An eligible worktree needs no extra confirmation.
-5. Try `git branch -d -- <branch>`. Git may reject a valid squash/rebase landing
+3. For a checkout that will be kept, release the target only from the current
+   clean worktree. Switch to the intended surviving branch. With no surviving
+   topic, use clean local main when it equals fresh main, or detach at the
+   fetched main SHA. Preserve a divergent local main. For `new`, create from
+   that verified main baseline.
+4. For a linked worktree slated for removal, match its exact path and branch.
+   Confirm it is clean (including untracked files), unlocked, free of ongoing
+   Git operations and unused by other tasks or services. Back up the branch tip
+   under [the backup namespace](#persist-the-dependency-boundary) and preserve
+   needed ignored configuration privately. Preserve the repository's original
+   checkout and any shared, active or otherwise protected worktree.
+   - **Ordinary Git worktree:** run `git worktree remove -- <path>` without force.
+   - **Codex-managed worktree:** use `archive_worktree` in the owning chat for
+     an eligible attachment. If Codex protects it as that chat's primary
+     checkout, confirm the exact owner is idle and use `set_thread_archived`
+     from another chat only when the user explicitly authorizes archiving
+     that owning chat. Otherwise keep the worktree and branch and report the
+     blocker. Chat archival can trigger asynchronous worktree cleanup and a
+     recoverable snapshot. Verify the snapshot when exposed by Codex.
+   - Before deleting the branch, verify the removed path is absent on disk
+     and absent from `git worktree list --porcelain`. If the chat archive
+     returns before cleanup finishes, recheck with bounded waits. Keep the
+     branch and report the pending release if the directory or registration
+     remains. An archive response alone does not release a branch.
+5. Recheck the saved branch tip and confirm no worktree checks it out. Try
+   `git branch -d -- <branch>`. Git may reject a valid squash/rebase landing
    because the original commits are not ancestors of HEAD. When every proof above
    holds and the rejection is only the not-merged ancestry check, the user's
    requested local cleanup authorizes `git branch -D -- <branch>`. Never use
    forced deletion to bypass extra commits or worktree occupancy.
 
-Verify and report worktree removals and branch deletions separately, including
-backup refs and any saved local configuration. Remote branches and PR settings
-remain unchanged unless separately requested.
+Report archived chats, released worktrees and deleted branches separately.
+Include backup refs, saved local configuration and any pending cleanup.
+Remote branches and PR settings remain unchanged unless separately requested.
 
 Primary references, consulted 2026-11-19:
 [Git rebase](https://git-scm.com/docs/git-rebase),
 [GitHub pull request API](https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request),
 [GitHub stacked PRs](https://docs.github.com/en/pull-requests/reference/stacked-pull-requests),
 [GitHub CLI stack sync](https://docs.github.com/en/pull-requests/reference/stacked-prs-cli-commands#gh-stack-sync).
+
+[Codex worktree cleanup](https://learn.chatgpt.com/docs/environments/git-worktrees#worktree-cleanup), consulted 2026-11-22.
