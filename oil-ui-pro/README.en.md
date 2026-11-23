@@ -26,17 +26,26 @@ Tell your agent what you need, for example:
 - “Create three designs with different typography, colors, and compositions. Put them on a comparison page so I can choose.”
 - “Keep the current brand and layout. Improve this form’s hierarchy, error messages, and mobile experience.”
 - “Polish this page using the project’s existing design guidelines.”
+- “Design an art-directed landing page for my product—pick 3 distinct styles from `oil-art-landing` so I can compare first.”
 - “Review these interfaces and explain what to change and how. Leave the files untouched.”
 
 Share any brand assets, screenshots, or existing project you have. It can start without references and only asks you questions when the deliverable is unclear.
 
 Intermediate candidates, screenshots, and media caches live in the project’s `.oil-ui` workspace. Final code and production assets are still written back to the project, and existing project conventions take precedence.
 
+## Included free: `oil-art-landing` (Art-Directed Landing Pages)
+
+Installing Oil UI Pro automatically installs the companion skill **`oil-art-landing`** alongside `oil-ui-pro` in your skills directory, built specifically for high-craft brand sites and multi-screen landing pages:
+
+- **Rich desktop & mobile visual anchors + product-tailored derivation**: Spans atmospheric nature (infrared film, polar glacier, sunlit conservatory monstera, wet forest moss), darkroom optics (X-ray, fluted amber glass), print & paper (cotton letterpress deboss, Swiss risograph, sumi-e ink wash), tactile hardware still-life, and dual-device mobile app directions—each chosen preview acts as an anchor adapted to your product, or you can derive a fresh medium from scratch.
+- **Compare directions first, then generate multi-screen layouts**: Preview 3 contrasting directions side by side before generating; mix and match 22 cross-industry module skeletons (hero, steps, split, comparison specs, pricing, FAQ, twilight CTA) while anchoring every screen to the master hero so style never drifts.
+- **Clean art plates + transparent foreground occlusion handoff**: When handed back to `oil-ui-pro` for production code, it strips UI/text cleanly into high-res background plates and extracts transparent foreground layers for true depth and scroll parallax. Browse 20 live interactive examples at [ui.oiloil.org/en/art-landing](https://ui.oiloil.org/en/art-landing/).
+
 ## How it works
 
 - **One recommendation by default, more when you ask to compare.** It understands the product and its references, selects the strongest internal candidate for your confirmation, then refines it against real screens. When you explicitly ask to compare directions, levels of change, or layouts, it puts the previews on one comparison page and develops only the one you choose.
 - **Leave one moment people remember.** Instead of pushing every part of the page, it makes one or two details exceptional, such as the response to a tap, a successful payment, AI at work, or a 404 page. Everything else stays quiet.
-- **Refine against real screenshots.** It checks the result at desktop and mobile sizes, then brings in a reviewer who hasn't seen the work in progress to find problems and give a score. It revises and reviews again, aiming for 9/10 within three rounds. With several directions, a side-by-side review catches sections that look alike; for new interfaces, the reviewer actually completes real tasks on the page.
+- **Blind review by default, deep polish on demand.** It checks the result at desktop and mobile sizes, then brings in an isolated reviewer to find problems and score the screen before delivery. When you choose deep polish, it re-reviews after revisions aiming for 9/10 (up to three rounds) with same-path UX rechecks. With several directions, a side-by-side review catches sections that look alike; when a page has a main workflow, a UX reviewer completes real tasks on the live page.
 - **Make interfaces easy to use.** Interactions and states, forms, dialogs and popovers, and desktop and mobile layouts each come with concrete practices. For dashboards and tools, it picks a workspace layout that fits what the product handles, and carries the style from the first screen all the way down.
 - **Polish a single component to the extreme.** It starts with a visual anchor, such as a realistic product render, takes the palette from it, and picks one graphic motif to carry throughout. From two or three sketches it develops just one: every state gets its own visual, and the main interaction acts directly on the anchor, so results appear as you drag. Review rounds check it up close, and it finishes with a showcase image plus an interaction frame sequence or a page the reviewer can operate directly. It records video only when normal-speed feel needs checking and the reviewer can play it.
 - **Start an existing project by working out what you want.** If it looks dated, it first decides whether the current design system is worth keeping, then recommends one level of change; explicit comparisons can cover anything from a light cleanup to a full reshape. If it's hard to use, it walks through the real task itself, finds out why the extra steps exist, and fixes the structure instead of adding a hint. For a new feature, it learns the product's existing habits first, then proposes genuinely different ways to do the job while keeping the current visual system. Changes go into shared components and design tokens; something as small as a single button gets changed directly.

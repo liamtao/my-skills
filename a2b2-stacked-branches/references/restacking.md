@@ -195,24 +195,31 @@ After the entire affected chain verifies:
    that verified main baseline.
 4. For a linked worktree slated for removal, match its exact path and branch.
    Confirm it is clean (including untracked files), unlocked, free of ongoing
-   Git operations and unused by other tasks or services. Back up the branch tip
+   Git operations and unused by other tasks or services. Back up the checkout's HEAD
    under [the backup namespace](#persist-the-dependency-boundary) and preserve
    needed ignored configuration privately. Preserve the repository's original
    checkout and any shared, active or otherwise protected worktree.
    - **Ordinary Git worktree:** run `git worktree remove -- <path>` without force.
-   - **Codex-managed worktree:** use `archive_worktree` in the owning chat for
-     an eligible attachment. If Codex protects it as that chat's primary
-     checkout, confirm the exact owner is idle and use `set_thread_archived`
-     from another chat only when the user explicitly authorizes archiving
-     that owning chat. Otherwise keep the worktree and branch and report the
-     blocker. Chat archival can trigger asynchronous worktree cleanup and a
-     recoverable snapshot. Verify the snapshot when exposed by Codex.
-   - Before deleting the branch, verify the removed path is absent on disk
-     and absent from `git worktree list --porcelain`. If the chat archive
-     returns before cleanup finishes, recheck with bounded waits. Keep the
-     branch and report the pending release if the directory or registration
-     remains. An archive response alone does not release a branch.
-5. Recheck the saved branch tip and confirm no worktree checks it out. Try
+   - **Codex-managed attachment owned by the current chat:** use
+     `archive_worktree` and verify the snapshot when Codex exposes it.
+   - **Codex-managed worktree owned by another chat or protected as a primary
+     checkout:** once the cleanup checks pass, give the user the desktop path
+     and the exact checkout path to match. In Codex desktop, open **Settings →
+     Storage → Manage Worktrees** (or **Settings → Worktrees**). Under
+     **Managed worktrees**, expand the repository and match the gray full path
+     beneath the chat title. Click the trash icon on that row and confirm
+     **Delete worktree**, leaving the recovery snapshot option enabled if shown.
+     Ask the user to report completion or share the exact error. A chat can
+     already be archived while its worktree still exists. Use the desktop
+     deletion flow for these targets.
+5. After the archive returns or the user reports desktop deletion, check that
+   the exact checkout path is absent on disk and absent from
+   `git worktree list --porcelain`. Allow a bounded recheck for asynchronous
+   cleanup. If either remains, report which check failed and keep the branch.
+   A parent directory containing only `.codex-worktree-name` does not count
+   as a remaining checkout.
+6. If branch deletion is in scope and the worktree had a branch, recheck the
+   saved branch tip and confirm no worktree checks it out. Try
    `git branch -d -- <branch>`. Git may reject a valid squash/rebase landing
    because the original commits are not ancestors of HEAD. When every proof above
    holds and the rejection is only the not-merged ancestry check, the user's
