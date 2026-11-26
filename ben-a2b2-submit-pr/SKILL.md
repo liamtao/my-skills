@@ -1,6 +1,6 @@
 ---
 name: ben-a2b2-submit-pr
-description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门禁，按要求逐层提交 GitHub stack。已有来源工单发布交付评论，无来源工单生成 Linear 草稿供确认。
+description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门禁，按要求逐层提交 GitHub stack。提交后同步 Linear，有对应工单就发交付评论，查重后确认缺工单就创建。
 ---
 
 # Ben 的 A2B2 PR 入口
@@ -10,7 +10,7 @@ description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门�
 ## 1. 读取依赖并确定范围
 
 - Ben 明确要求「链式提交」或「提交为 GitHub stack」时，按[链式提交](references/stacked-pr.md)确定范围，使用团队的「逐层提交 PR」策略。普通提交沿用现有策略选择和提交步骤。
-- 以当前选定 checkout 的 Git 根目录为准，遵循该目录的 `AGENTS.md` 和本地 `AGENTS.override.md`。
+- 以当前选定 checkout 的 Git 根目录为准，遵循该目录的 `AGENTS.md`。PR 提交和 Linear 同步使用主 checkout 的最新个人 `AGENTS.override.md` 及总控规则。
 - 在分支操作或提交准备前，读取该 checkout 的 `.agents/skills/a2b2-pre-push-checks/SKILL.md` 及其 `references/pull-request.md`。始终使用仓库当前版本，保持团队文件原样。
 - 在改名前从原始需求、工作项或工作区关联确认开发来源的 Linear 工单，记录其 ID 和链接。PR 创建后的自动关联只说明已关联。来源存在歧义时先核对或询问。
 - 确认 Git 根目录、当前分支、工作区、worktree、远端、upstream 和已有 PR；保留其他任务的改动。按团队准备流程确定实际 PR base。涉及未合入的祖先层时，先复用已确认的 PR 策略；尚未确定则按团队流程询问，不能默认把祖先改动全算进本次 PR。
@@ -39,7 +39,7 @@ description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门�
 
 继续执行 `a2b2-pre-push-checks` 和 PR preparation，在本次授权范围内完成所需门禁、提交、推送及 PR 创建或更新。门禁命令、截图、附件、模板及 draft／ready 规则以团队当前文件为准，不在个人入口复制或简化。
 
-复用本次范围和修订仍适用的已完成步骤与授权。遇到检查失败或必需覆盖缺口，按团队规则停在对应阶段；不将失败描述成成功，也不进入 Linear 的交付写入。创建 PR 不授权合并或部署。
+复用本次范围和修订仍适用的已完成步骤与授权。遇到检查失败或必需覆盖缺口，按团队规则停在对应阶段。若团队规则允许本次提交 draft PR，则提交并核验后继续同步 Linear，注明实际检查结果与缺口。合并和部署各自需要授权。
 
 需要在浏览器中打开 GitHub、编辑 PR 或上传验收截图／录屏时，使用 ego-browser，并明确选择 Ego Lite 的 `Liam` profile。按当前 ego-browser 指南查询 profile ID 后创建对应 TaskSpace；现有 GitHub 连接器足够时继续优先使用连接器。
 
@@ -49,7 +49,7 @@ description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门�
 
 独立读回 PR，核对 URL、base、head SHA、范围及 draft／ready 状态。已有 PR 时更新或复用该 PR，避免重复创建。超时或结果不明确时先查询实际结果，再决定是否重试。
 
-在 Ben 本机为每个已核验的 `Equoragroup/a2b2` PR 登记评审跟进，使用[总控规则](/Users/ben/.config/a2b2/orca-ux-coordinator.md)的「PR 提交后的评审跟进」。在总控所属聊天内直接登记；总控派出的 worker 把登记资料放进原 dispatch 回报；普通项目会话用 `orca orchestration send --to 'bot:A2B2 UX 总控' --type handoff --subject '登记 PR #<编号> 评审' --body-file <登记资料文件> --json` 交接评审跟进。资料列出已核验的 PR、base、head 分支和 SHA、原 worktree 路径及可核验的 Orca 选择器、目标端、获批范围和出处。更新原 PR 也回传最新 SHA。Ben 明确跳过跟进时尊重本次选择；按实际回执区分「已送达」「已监听」「登记受阻」，单独汇报，不影响 PR 与 Linear 流程。
+在 Ben 本机为每个已核验的 `Equoragroup/a2b2` PR 登记评审跟进，使用[总控规则](/Users/ben/.config/a2b2/orca-ux-coordinator.md)的「PR 提交后的评审跟进」。在总控所属聊天内直接登记；总控派出的 worker 把登记资料放进原 dispatch 回报；普通项目会话用 `orca orchestration send --to 'bot:A2B2 UX 总控' --type handoff --subject '登记 PR #<编号> 评审' --body-file <登记资料文件> --json` 交接评审跟进。资料列出已核验的 PR、base、head 分支和 SHA、原 worktree 路径及可核验的 Orca 选择器、目标端、获批范围和出处。更新原 PR 也回传最新 SHA。提交方在本节登记评审时说明 Linear 同步由自己执行，并在下一节回报完成结果或交接待办。Ben 明确跳过跟进时尊重本次选择；按实际回执区分「已送达」「已监听」「登记受阻」，单独汇报，不影响 PR 与 Linear 流程。
 
 链式提交逐层完成本节后，按[连接 GitHub stack](references/stacked-pr.md#连接-github-stack)创建、扩展或复用原生 stack，并读回确认。连接结果与 PR 提交结果分别汇报。
 
@@ -57,16 +57,14 @@ description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门�
 
 ## 4. 交付到 Linear
 
-PR 成功创建或更新并读回后，传递已核验的 PR URL、实际 base/head SHA、验证结果、按场景配对的截图与图注，以及本次已明确的 Linear 选择。按实际 PR diff 判断覆盖范围。链式提交默认处理指定目标分支的 PR。Ben 明确指定其他层时，按各层实际 base/head 分别核对。
+PR 成功创建或实质更新并读回后，执行[总控规则](/Users/ben/.config/a2b2/orca-ux-coordinator.md)的「PR 提交后的 Linear 同步」。调用下游技能时传递 Ben 的 PR 后同步长期授权、PR 链接、实际 base/head SHA、验收结果和配对截图。链式提交按本次指定范围逐层核对。
 
-- **已有明确的来源工单**：调用 `linear-delivery-comment` 的「PR 来源工单」流程，复用已核验的 Linear 草稿交付正文，发到原工单的评论区。Ben 已授权此流程在提交并核验 PR 后发布一条来源票交付评论。保留原工单描述、状态及其他字段。GitHub 集成自动关联或移动工单后，仍须查找并补齐交付评论。
-- **没有明确的来源工单**：使用项目的 `a2b2-pr-to-linear`，或从 Skills Manager 解析已安装版本，做范围分析、查重和拟新建／更新草稿。工单字段、Sprint 和初始状态按该技能解析。展示完整批次并取得 Ben 对该批次的明确确认后才可写入。复用同批已明确的 Sprint 与授权，变更实质范围时重新确认。
-- Ben 要求「先存草稿」「暂不发」「只提交 PR」或「跳过 Linear」时，按本次要求保留草稿或跳过。工单字段变更、额外工单及额外评论沿用各自授权范围。
+已有对应工单时发布交付评论，查重后确认缺工单时直接创建。使用总控规则决定本次写入授权和状态。Ben 的本次跳过或暂存指令优先。
 
-完成条件：来源票评论已读回并可链接，或按本次要求交付了待确认草稿。若 Linear 不可用，报告实际 PR 和具体阻塞，保留待发布正文。
+完成条件：读回工单或评论并确认 PR 关联，把直链回报给 Ben 和总控。需要接续时，交接现有记录、待办和具体阻塞，由总控核对后继续。
 
 ## 5. 汇报
 
-简要列出分支名及是否改名、PR 链接、门禁与验收结果及缺口。Linear 评论已发布时给出评论直链。草稿待确认或发布受阻时报告实际状态。
+简要列出分支名及是否改名、PR 链接、门禁与验收结果及缺口。Linear 同步完成后给出工单或评论直链。暂存或写入受阻时报告实际状态。
 
 链式提交另报 stack 编号、各层 PR 的顺序和 base，以及连接结果。已建 PR 而连接待完成时，保留 PR 链接供下次恢复。

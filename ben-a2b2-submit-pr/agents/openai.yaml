@@ -1,4 +1,4 @@
 interface:
   display_name: "Ben A2B2 Submit PR"
-  short_description: "Prepare an A2B2 PR and draft Linear updates for approval"
-  default_prompt: "使用 $ben-a2b2-submit-pr 提交当前改动，并生成 Linear 同步草稿，写入前让我确认。"
+  short_description: "Submit an A2B2 PR and sync its Linear issue"
+  default_prompt: "使用 $ben-a2b2-submit-pr 提交当前改动，并同步 Linear。已有对应工单就评论，缺工单就创建。"
