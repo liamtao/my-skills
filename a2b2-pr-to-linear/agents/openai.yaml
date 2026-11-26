@@ -1,4 +1,4 @@
 interface:
   display_name: "PR 功能记录到 Linear"
   short_description: "将 A2B2 PR 的功能与修复整理成 Linear 草稿，确认后创建或复用票据"
-  default_prompt: "使用 $a2b2-pr-to-linear，把这个 PR 的功能和修复整理到 Linear；先询问放当前还是下个 Sprint，再查重并列出完整草稿，确认后创建或更新。"
+  default_prompt: "使用 $a2b2-pr-to-linear，把这个 PR 的功能和修复整理到 Linear；按新加坡建票日期确定默认 Sprint，查重并列出完整草稿，确认后创建或更新。"

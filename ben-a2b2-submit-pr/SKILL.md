@@ -1,6 +1,6 @@
 ---
 name: ben-a2b2-submit-pr
-description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门禁提交，明确要求「链式提交」时逐层提交并连接 GitHub stack，默认生成 Linear 同步草稿供确认。
+description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门禁，按要求逐层提交 GitHub stack。已有来源工单发布交付评论，无来源工单生成 Linear 草稿供确认。
 ---
 
 # Ben 的 A2B2 PR 入口
@@ -12,7 +12,7 @@ description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门�
 - Ben 明确要求「链式提交」或「提交为 GitHub stack」时，按[链式提交](references/stacked-pr.md)确定范围，使用团队的「逐层提交 PR」策略。普通提交沿用现有策略选择和提交步骤。
 - 以当前选定 checkout 的 Git 根目录为准，遵循该目录的 `AGENTS.md` 和本地 `AGENTS.override.md`。
 - 在分支操作或提交准备前，读取该 checkout 的 `.agents/skills/a2b2-pre-push-checks/SKILL.md` 及其 `references/pull-request.md`。始终使用仓库当前版本，保持团队文件原样。
-- 找到并读取已安装的 `a2b2-pr-to-linear`；优先使用项目 `.agents/skills/a2b2-pr-to-linear/SKILL.md`，也可通过 Skills Manager 解析中央库位置。后续按需读取它要求的依赖。缺失时明确报告，不自行复制或改写替代流程。
+- 在改名前从原始需求、工作项或工作区关联确认开发来源的 Linear 工单，记录其 ID 和链接。PR 创建后的自动关联只说明已关联。来源存在歧义时先核对或询问。
 - 确认 Git 根目录、当前分支、工作区、worktree、远端、upstream 和已有 PR；保留其他任务的改动。按团队准备流程确定实际 PR base。涉及未合入的祖先层时，先复用已确认的 PR 策略；尚未确定则按团队流程询问，不能默认把祖先改动全算进本次 PR。
 - 分析实际 base 到 head 的完整改动、提交历史和本次拟提交文件。范围确定后才命名；不以最近一次 commit 或分支旧名代替实际改动。
 
@@ -43,28 +43,30 @@ description: 在 Ben 的 A2B2 项目提交或更新 PR 时使用。走团队门�
 
 需要在浏览器中打开 GitHub、编辑 PR 或上传验收截图／录屏时，使用 ego-browser，并明确选择 Ego Lite 的 `Liam` profile。按当前 ego-browser 指南查询 profile ID 后创建对应 TaskSpace；现有 GitHub 连接器足够时继续优先使用连接器。
 
+页面布局、主要操作路径或关键交互状态有显著变化时，为每个受影响的代表场景保留可用于周报的 Before / After 实机或浏览器截图。按团队截图规范用同一平台、视口、语言、数据和操作步骤，分别取 PR 实际改动前的基线和本次 head；复用已核验的验收截图。图注写明场景、平台、版本和用户可见变化。全新入口优先展示原有操作路径，确无可比基线时只附 After 并注明原因。将图片嵌入对应 PR 正文并读回打开；更新 PR 时替换已失效的对比。
+
+在 Before / After 对比图的两侧，用醒目的红色描边框出需要审阅的对应区域，例如控件原位与新位置，或布局改变前后的范围。框线避开文字和关键控件。图中有留白时，用一句短注说明新设计带给用户的好处。保留原始截图，预览最终标注图，确认每个红框都指向实际变化且缩小后仍可辨认。
+
 独立读回 PR，核对 URL、base、head SHA、范围及 draft／ready 状态。已有 PR 时更新或复用该 PR，避免重复创建。超时或结果不明确时先查询实际结果，再决定是否重试。
+
+在 Ben 本机为每个已核验的 `Equoragroup/a2b2` PR 登记评审跟进，使用[总控规则](/Users/ben/.config/a2b2/orca-ux-coordinator.md)的「PR 提交后的评审跟进」。在总控所属聊天内直接登记；总控派出的 worker 把登记资料放进原 dispatch 回报；普通项目会话用 `orca orchestration send --to 'bot:A2B2 UX 总控' --type handoff --subject '登记 PR #<编号> 评审' --body-file <登记资料文件> --json` 交接评审跟进。资料列出已核验的 PR、base、head 分支和 SHA、原 worktree 路径及可核验的 Orca 选择器、目标端、获批范围和出处。更新原 PR 也回传最新 SHA。Ben 明确跳过跟进时尊重本次选择；按实际回执区分「已送达」「已监听」「登记受阻」，单独汇报，不影响 PR 与 Linear 流程。
 
 链式提交逐层完成本节后，按[连接 GitHub stack](references/stacked-pr.md#连接-github-stack)创建、扩展或复用原生 stack，并读回确认。连接结果与 PR 提交结果分别汇报。
 
 完成条件：已验证本次 PR 的实际结果，或已报告具体阻塞；区分本地验证、CI、合并和部署证据。
 
-## 4. 默认进入 PR → Linear 草稿及确认
+## 4. 交付到 Linear
 
-PR 成功创建或更新并读回后，自动调用 `a2b2-pr-to-linear`，传递已核验的 PR URL、实际 base/head SHA、验证结果和本次已明确的 Linear 选择。下游以该 PR 实际 diff 为准做覆盖分析、查重和 issue 草稿，不使用整个分支相对 main 的改动替代 stacked PR 范围。
+PR 成功创建或更新并读回后，传递已核验的 PR URL、实际 base/head SHA、验证结果、按场景配对的截图与图注，以及本次已明确的 Linear 选择。按实际 PR diff 判断覆盖范围。链式提交默认处理指定目标分支的 PR。Ben 明确指定其他层时，按各层实际 base/head 分别核对。
 
-- 链式提交默认以指定目标分支的 PR 生成草稿。Ben 明确指定其他层时，按对应 PR 分别核对范围和查重。
-- 默认走 issue 创建／更新，不同时调用 `linear-delivery-comment`。Ben 明确改为只发交付评论时，再遵循该技能的独立确认流程。
-- 由 `a2b2-pr-to-linear` 处理 parent、assignee、实时 Sprint 选择、完整草稿、查重和读回规则；复用同批次已有选择。没有 Sprint 答案时继续保持待选择。
-- **任何 Linear 写入前，必须先展示完整拟创建／更新批次并取得 Ben 对该具体批次的明确确认。** “提交 PR”、调用本入口或创建此技能均不算写入批准；等待期间可继续只读分析。已确认且范围未变的同一批次不重复索取批准。
-- Ben 说先存草稿或不发时，保留草稿并报告位置，不写入。Ben 明确只提交 PR 或跳过 Linear 时尊重本次范围，不强制同步。
-- 新 issue 的初始状态交由 `a2b2-pr-to-linear` 解析并在草稿中展示。变更现有 issue、父项或子项的状态需要 Ben 明确指定。
-- 按下游规则记录每个成功写入的 issue 和 PR 关联；中断后从已核实结果继续。若 PR 修订或批次范围变化，检查差异并对实质新增或修改重新确认，避免重复建票。
+- **已有明确的来源工单**：调用 `linear-delivery-comment` 的「PR 来源工单」流程，复用已核验的 Linear 草稿交付正文，发到原工单的评论区。Ben 已授权此流程在提交并核验 PR 后发布一条来源票交付评论。保留原工单描述、状态及其他字段。GitHub 集成自动关联或移动工单后，仍须查找并补齐交付评论。
+- **没有明确的来源工单**：使用项目的 `a2b2-pr-to-linear`，或从 Skills Manager 解析已安装版本，做范围分析、查重和拟新建／更新草稿。工单字段、Sprint 和初始状态按该技能解析。展示完整批次并取得 Ben 对该批次的明确确认后才可写入。复用同批已明确的 Sprint 与授权，变更实质范围时重新确认。
+- Ben 要求「先存草稿」「暂不发」「只提交 PR」或「跳过 Linear」时，按本次要求保留草稿或跳过。工单字段变更、额外工单及额外评论沿用各自授权范围。
 
-完成条件：已交付等待确认的完整草稿，或批准后的每项写入均已读回验证。若 Linear 不可用，报告 PR 已完成及 Linear 待办，不重新提交 PR。
+完成条件：来源票评论已读回并可链接，或按本次要求交付了待确认草稿。若 Linear 不可用，报告实际 PR 和具体阻塞，保留待发布正文。
 
 ## 5. 汇报
 
-简要列出分支名及是否改名、PR 链接、门禁与验收结果及缺口，以及 Linear 当前是待选择、待确认、已保存还是失败。已保存时给出 issue 链接；未保存时不声称同步完成。
+简要列出分支名及是否改名、PR 链接、门禁与验收结果及缺口。Linear 评论已发布时给出评论直链。草稿待确认或发布受阻时报告实际状态。
 
 链式提交另报 stack 编号、各层 PR 的顺序和 base，以及连接结果。已建 PR 而连接待完成时，保留 PR 链接供下次恢复。

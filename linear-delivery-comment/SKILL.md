@@ -8,8 +8,9 @@ description: >-
   bilingual delivery comment (改动点 / 交互逻辑 / Commit / 状态·抄送), confirms it with Ben,
   then posts it via the Linear MCP with the chosen reviewers or cc recipients. Ticket status stays
   unchanged unless Ben explicitly requests a status change. Also handles buffering: when Ben says "存草稿别发 / 先存着", save the comment to a
-  local draft file instead of posting; when he says "发 XXX 的草稿", publish a held draft. Do NOT
-  default to @-mentioning Trista.
+  local draft file instead of posting; when he says "发 XXX 的草稿", publish a held draft.
+  Also publishes verified PR delivery on a known originating ticket when called by
+  ben-a2b2-submit-pr. Do NOT default to @-mentioning Trista.
 ---
 
 # Linear Delivery Comment
@@ -23,6 +24,15 @@ then posts it and moves the ticket per Ben's instruction.
 ## Status authorization
 
 Keep Linear status unchanged unless Ben explicitly requests the status change for the named ticket(s). This includes parent tickets and subtickets. Approval to implement, test, commit, push, upload, open a PR, deploy, publish a comment, invoke this skill or request review does not authorize a status change.
+
+## PR 来源工单
+
+从 `ben-a2b2-submit-pr` 接收已核验的 PR、来源工单 ID、base/head、验收结果和可分享的图片。此流程沿用 Ben 对来源票交付评论的授权。Ben 要求暂缓或跳过 Linear 时，按本次要求处理。独立的设计交付仍走下方 Workflow。
+
+1. 读原工单和评论，用 PR 链接查重。已有同一 PR 的交付评论且内容有效时，复用其链接。若 PR 更新导致交付内容实质改变，在有权限时更新自己发布的原交付评论。写入结果不明时按工具提示读回或恢复，确认未落地后再重试。
+2. 复用 Linear 草稿的交付正文。手头没有草稿时，从已核验的 PR 和验收证据起草。保留用户可感知的变更、验收结果和 PR 链接，并标明未测范围。移除仅用于草稿审批的字段计划和内部说明。默认省略审阅者和抄送。
+3. 有 Before / After 图时，读取 `linear-create-issue` 的 Step 3.5，在评论中嵌入上传至 Linear 的对比图。只使用获准分享的截图，保留场景及平台图注。
+4. 通过当前获授权的 Linear 工具发布为原工单的一条评论。从 Orca Chat 工作时用 `orca linear comment add <issue-id> --body-file <path>`。若由该工单线程唤醒，按 Orca 规则用 `orca bot reply`。写入范围仅限交付评论。读回正文和内嵌图片，确认图片可加载后报告评论链接。
 
 ## Why the comment looks the way it does
 
@@ -64,6 +74,7 @@ Keep Linear status unchanged unless Ben explicitly requests the status change fo
    Include a proposed status change only when Ben explicitly requested it. Approval to post the comment alone leaves status unchanged.
 
 6. **On confirmation, post:**
+   - For approved screenshots or recordings, follow `linear-create-issue` Step 3.5 to embed and verify inline media in the comment.
    - Post the comment: `save_comment` with `issueId:"<A2B-xxx>"` and `body:<comment>`.
    - Leave status unchanged for both review and cc branches unless Ben explicitly requested a status change.
    - For an explicitly requested change, resolve the target status for the owning team, change only the named ticket(s), then read back the result. If the requested status is unavailable, report that and preserve the current status; do not substitute another status.
@@ -177,7 +188,7 @@ Drafts are plain markdown — Ben can hand-edit them before publishing.
 
 ## Guardrails
 
-- **Confirm before writing to Linear.** Draft first, post on Ben's word only.
+- **Use the applicable authorization.** The PR 来源工单 flow uses Ben's standing delivery-comment authorization. For an independent design delivery, draft first and post on Ben's word.
 - **Source the content from real work** (git diff + decision docs). Do not invent changes or rationale.
 - **Never pad.** No alternatives section; if edge cases are genuinely none, write "无".
 - **Respect buffering.** If Ben wants to hold, keep the draft ready and don't post or move status.

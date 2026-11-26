@@ -201,23 +201,14 @@ Write every section for the **mixed audience** (see the Audience rule): plain la
 
 ---
 
-## Step 3.5 — Media-embedding workflow (inline preview non-negotiable)
+## Step 3.5 — Embed media inline in Linear
 
-All media files (images, design mockups, screen recordings, videos) MUST be embedded into the issue body in a format that **previews and renders directly inside Linear**. **NEVER output media as a plain downloadable file link (e.g. `[file.mp4](url)`) or unrendered attachment that forces the reader to download.**
+Use this workflow for issue descriptions and delivery comments. The reader should see the image inside Linear. A text link or a Resources attachment alone does not satisfy this step.
 
-1. **Section placement rules (Strict):**
-   - **New design screenshots / mockups / videos** → MUST be placed directly under `## Expected Behavior & Acceptance Criteria` (or `## Acceptance Criteria`).
-   - **Current state / bug / error screenshots or videos** → place directly under `## Current Behavior` or `## Steps to Reproduce`.
-2. **Create the issue first** (Step 7) so an issue ID exists — attachments upload against an existing issue.
-3. **For each media file (image or video)**, run the upload sequence one file at a time (don't batch prepares — signed URLs expire in 60s):
-   - `prepare_attachment_upload` with `issue`, `filename`, `contentType` (e.g. `image/png`, `video/mp4`), exact `size` in bytes (check with `ls -la` or equivalent), and a descriptive `title` (e.g. "New design prototype", "Current behavior recording").
-   - `curl -X PUT --data-binary @<path>` to `uploadRequest.url` with **every header in `uploadRequest.headers` sent verbatim** (casing included).
-   - `create_attachment_from_upload` with the returned `assetUrl` to finalize it as a Linear attachment.
-4. **Must-be-previewable embedding syntax**:
-   - **Images:** Use image markdown `![<title>](<assetUrl>)` so Linear renders the image preview inline.
-   - **Videos:** Use Linear inline video player syntax or embed markdown `![<title>](<assetUrl>)` (or HTML `<video src="<assetUrl>" controls></video>`), ensuring the media player or preview renders directly in the body. Do NOT use `[title](url)` link syntax which renders as a plain download hyperlink.
-   - Use `save_issue`'s `patch` with `insert_after`/`insert_before` anchors or update description to ensure new design media is placed right under `## Expected Behavior & Acceptance Criteria`.
-5. Don't dump all media at the top or bottom of the body as an afterthought — match each one to the section it's evidence for.
+1. **Place the evidence.** In an issue, place separate Before captures under `## Current Behavior` (or `## Steps to Reproduce` for a bug) and After captures under `## Expected Behavior & Acceptance Criteria`. Place a combined Before / After image once, with a caption naming the scenario and platform. In a comment, place comparisons under `## Before / After` after the delivery summary.
+2. **Upload approved files to Linear.** Use the authorized workspace connection and `prepare_file_upload` with `filename`, `contentType`, and the exact byte size. For each file, immediately PUT its raw bytes to `uploadRequest.url` with every returned header verbatim, then prepare the next file. The signed upload URL expires quickly. If the tool is unavailable, insert the approved file through the authenticated Linear editor. Reuse an existing verified Linear asset for the same image when available.
+3. **Embed in the field.** Use the upload result's image Markdown or `![<descriptive caption>](<assetUrl>)` with the stable Linear asset URL. Use Linear's inline player for video. Save the embeds as part of the issue description or comment. Only add a separate Resources attachment when requested.
+4. **Verify after saving.** Reopen the issue or comment and check that each image renders in place. If checking through Orca, verify the correct `description` or `comment` entries in `inlineMedia` and confirm each image loads. If an image cannot be embedded or verified, report that gap and keep the approved file available for retry.
 
 ---
 
@@ -261,8 +252,7 @@ If unsure which module, pick the closest and mention it in the draft so Ben can 
 0b. **Split (One-ticket-one-thing rule).** If the request bundles multiple deliverables, split into N drafts and decide the shared parent (reuse before new) per the Parent policy.
 1. **Assemble the draft(s)** and show Ben the full ticket in Simplified-Chinese-framed preview: Title, Type/Labels, Team, Project/Parent (if any), Priority/Due (if any), **Assignee**, **Stakeholders/subscribers**, and the full English body. If you split, present all drafts together with a one-line note on how/why you split and the proposed parent.
 2. **Wait for explicit confirmation.** Offer quick edits (title wording, assignee, stakeholders, priority, and the split itself — merge/split further).
-3. **On confirm**, create each ticket via `save_issue` (no `id`) with: `title`, `team`, `description`, `labels`, `assignee`, plus any of `priority`/`dueDate`/`project`/`parentId` that were set. When you split, set the same `parentId` on every child (create the umbrella parent first if it's new). Stakeholder subscriptions ride along via the `@displayName` mentions in `description`.
-3a. **If Ben provided design images/videos**, run the Media-embedding workflow (Step 3.5) against the now-existing issue(s) and attach/embed them under **Expected Behavior & Acceptance Criteria** (or under Current Behavior for bug evidence).
+3. **On confirm**, prepare approved embeds using Step 3.5, then create each ticket via `save_issue` (no `id`) with: `title`, `team`, `description`, `labels`, `assignee`, plus any of `priority`/`dueDate`/`project`/`parentId` that were set. When you split, set the same `parentId` on every child (create the umbrella parent first if it's new). Stakeholder subscriptions ride along via the `@displayName` mentions in `description`. When using the Linear editor for embeds, insert them in the approved description and verify after saving.
 4. **Report back** every created issue's identifier + URL (and the parent, if new). If a bug, confirm the `Bug` label is set. Report the saved status; do not progress it automatically.
 5. **If a Notion URL was referenced during the request**, proceed to Step 8 (Notion backlink workflow).
 

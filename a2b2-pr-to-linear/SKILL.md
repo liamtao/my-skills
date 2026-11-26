@@ -1,6 +1,6 @@
 ---
 name: a2b2-pr-to-linear
-description: "Record features and fixes from an A2B2 pull request in Linear: inspect the full PR, group related changes, find existing tickets, preview complete drafts, then create or update approved records. Use when Ben asks to turn a submitted PR into Linear tickets or subissues."
+description: "Record features and fixes from an A2B2 pull request in Linear: inspect the full PR, group related changes, find existing tickets, preview complete drafts, then create or update approved records. Use for PR-to-Linear intake or preparing Ben’s Tuesday sprint report for Ashok."
 ---
 
 # Record PR features in Linear
@@ -8,6 +8,8 @@ description: "Record features and fixes from an A2B2 pull request in Linear: ins
 Produce a traceable record of the requested PR scope. Talk with Ben in Chinese; write ticket titles and bodies in English unless he requests otherwise.
 
 For ticket wording, Bug sections and media placement, read the installed [linear-create-issue skill](../../../.agents/skills/linear-create-issue/SKILL.md). This skill owns PR scope, batch grouping and execution. Reuse the user's existing choices and confirmation instead of asking for them again.
+
+For Ashok’s Tuesday report, follow [Dot’s Tuesday workflow](tuesday-report.md) directly. The intake steps below apply when recording PR work.
 
 ## Ben's defaults
 
@@ -17,10 +19,10 @@ Use these defaults unless Ben explicitly overrides them for the current batch or
 | --- | --- |
 | Parent for iOS or Portal Mobile work | ENG-660. Include a shared Web/Mobile change here when its grouped outcome includes iOS or Portal Mobile. Resolve a suitable parent separately for other work. |
 | Assignee for all records | Ben, verified through ben@a2b2.ai. |
-| Sprint for all records | Proactively ask Ben to choose the current or next sprint for each batch, showing the owning team's live cycle names and dates. Reuse an explicit choice already given for that batch. |
+| Sprint | For new issues use the creation date in Asia/Singapore. Monday and Tuesday target the coming Wednesday. Wednesday through Sunday target the most recent Wednesday, including today. An explicit cycle overrides the default. Keep the cycle on reused issues unless Ben requests a move. |
 | State | For new tickets created from a PR, propose **Ready for Testing** for the current sprint and **In Progress** for the next sprint. An explicit state for that ticket takes precedence. Preserve the status of existing tickets. |
 
-Keep the parent and assignee defaults without asking again; obtain the sprint choice for the batch. The sprint sets the proposed initial state of new PR tickets. Write that state only after Ben approves the concrete draft showing it. Changing an existing ticket, parent or subissue status requires an explicit request naming the affected records. These defaults do not authorize changes to the parent itself or other tickets, bypass batch confirmation or establish that testing has passed.
+Show the resolved parent, assignee and sprint in the batch preview. The sprint sets the proposed initial state of new PR tickets. Write that state only after Ben approves the concrete draft showing it. Changing an existing ticket, parent or subissue status requires an explicit request naming the affected records. These defaults do not authorize changes to the parent itself or other tickets, bypass batch confirmation or establish that testing has passed.
 
 When the parallel development coordinator requests a draft before opening the PR, use the intended base/head diff and evidence for a read-only preview. Apply the same grouping, duplicate search, sprint, state and full-body rules below. Mark the PR URL and any pending gate results for completion from the submitted PR. The coordinator can present that concrete batch together with the final design decision. After submission, verify the actual PR diff, evidence, duplicates, cycle and records. Reuse approval for the same batch and fill verified links/results. Reconfirm any material change to scope, proposed action, fields or verification outcome before writing. Ordinary PR-to-Linear requests continue from the submitted PR.
 
@@ -31,7 +33,7 @@ When the parallel development coordinator requests a draft before opening the PR
 - Read the PR title, description, current base/head SHA, all changed-file pages and complete patches. Use the actual PR base, including a stacked PR's parent branch, rather than the whole local branch or an assumed main base. Inspect commit history to explain iterations; describe the resulting PR behavior, not reverted experiments as delivered features. Account for fixes, shared cross-app changes and supporting configuration. Flag unavailable or truncated evidence before claiming full coverage.
 - Resolve parent, team, assignee and cycle using explicit instructions for this batch first, then Ben's defaults. For each create, resolve the proposed initial state by name in the owning team. If the chosen sprint is outside the mapping and no state was specified, or the team has no unique match, ask for the initial state before confirming that draft. Read the parent and its children. Keep parent and project separate.
 - Resolve people through Linear. “Me” in Ben's request means Ben, not necessarily the connector's authenticated user; verify the account, using ben@a2b2.ai when appropriate.
-- Query the owning team's current and next cycles, verify their dates and ask: “这批 ticket 放在当前 Sprint（名称、日期），还是下个 Sprint（名称、日期）？” Ask early while continuing independent PR analysis. If Ben already chose for this batch, use that answer without asking again. Keep the cycle decision pending until answered; do not select an option after a timeout. If either cycle cannot be established uniquely, report the gap instead of guessing. Resolve the chosen cycle by UUID, not internal number; displayed sprint names can differ from cycle numbers.
+- Match the target Wednesday to the local start date of a live cycle in the owning team and use its UUID. Query adjacent cycles as needed, including early Wednesday before Linear rolls over. Show the cycle name or number and dates. Ask only for conflicting dates or an unresolved match.
 - Ask together for essential missing settings while continuing independent PR analysis. Offer Engineering as the team for A2B2 engineering work. Present optional unset fields as unset; avoid inventing priority or due dates.
 - Preserve existing ticket status unless Ben explicitly requests a transition for that ticket. Show parent changes for reused tickets in the proposal.
 
@@ -68,7 +70,8 @@ Use the ticket-writing skill's Background / Why, Current Behavior, acceptance cr
 - Explain the resulting behavior in product language. Put technical diagnosis in the Bug or technical section when needed.
 - Link the PR and summarize relevant checks and material gaps. Distinguish code implemented, local/static checks, runtime acceptance, CI, merge and deployment. Leave acceptance boxes unchecked unless the supporting result establishes that criterion.
 - Use confirmed requirements or reported behavior to define acceptance. Mark inferred criteria for confirmation rather than extending product scope from code alone.
-- Include the resolved stakeholders using supported mentions; only claim subscriptions if the tool or read-back confirms them.
+- Preserve stakeholder order. For new PR issues, put one named Acceptance owner in the Stakeholders section. Use Ben’s explicit choice first, then the first listed stakeholder, then the actual Linear issue creator. If the creator is only known after creation, show the creator fallback in the draft and verify the resolved person on read-back. Use supported mentions.
+- For significant UI/UX changes, include the PR’s scenario-matched Before and After images in the proposed ticket. On approval, upload the images to Linear and embed Before under Current Behavior and After under Acceptance Criteria. Include the scenario, platform and a short caption. For a new surface with no baseline, label the After image accordingly. Preserve original media when updating and reuse verified matching assets on retry.
 - Keep ticket descriptions self-contained for people without the local checkout. Link durable sources instead of local paths, raw logs, private customer data or chat-dependent references.
 - Keep original text, media and attachments when extending an existing issue. Place authorized new evidence using the ticket-writing skill's media guidance; explain unavailable evidence instead of claiming an upload.
 
@@ -76,7 +79,7 @@ Wait for confirmation of this concrete batch before writes. A request to create 
 
 ## 4. Apply the approved plan
 
-Re-read existing tickets immediately before updating and check for overlapping edits. Recheck the chosen cycle's dates before writes. If the cycle crossed a boundary, resolve the sprint and proposed initial state again and show the revised fields for confirmation before creating tickets. Preserve existing ticket status unless Ben explicitly requested a change. If the PR head changed since preview, inspect the delta; obtain confirmation for added or materially changed scope.
+Re-read existing tickets immediately before updating and check for overlapping edits. At creation time re-evaluate the actual Singapore date, live cycle and proposed initial state. Ask again only if approved fields change. This includes a Sunday draft created on Monday and a Tuesday draft created on Wednesday whose cycle stays the same but whose proposed state changes. Preserve existing ticket status unless Ben explicitly requested a change. If the PR head changed since preview, inspect the delta; obtain confirmation for added or materially changed scope.
 
 - Use Linear's current create/update operation and explicit resolved IDs. Attach a link to the PR on each record. Use real newlines in Markdown.
 - Create only approved new records. For reuse, prefer a narrow append or anchored patch and apply only the approved metadata changes. Preserve unrelated fields and media.
@@ -88,7 +91,7 @@ Completion: each approved action has a known saved record or a specific unresolv
 
 ## 5. Read back and report
 
-Independently read every saved ticket. Verify title and requested terminology, body, labels, assignee, parent, cycle, effective state and PR link. For reused tickets, verify the original content and media remain. Compare media asset identity and metadata rather than temporary signed URL query strings.
+Independently read every saved ticket. Verify title and requested terminology, body, labels, assignee, parent, cycle, effective state and PR link. Verify the acceptance owner and open the saved UI images to check scenario, labels and order. For reused tickets, verify the original content and media remain. Compare media asset identity and metadata rather than temporary signed URL query strings.
 
 Correct mismatches within the approved scope and re-read them. Report created and updated records with identifiers and links, common metadata, exclusions and any unresolved verification. Close the batch's work-state item only after all approved writes and checks are accounted for.
 
